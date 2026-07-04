@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/custom_app_bar.dart';
 import '../../models/analysis_result.dart';
 import '../../models/ingredient.dart';
 import '../../services/storage_service.dart';
@@ -55,15 +56,7 @@ class CompareScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text('Bandingkan Produk'),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-      ),
+      appBar: const CustomAppBar(title: 'Bandingkan Produk'),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -93,13 +86,8 @@ class CompareScreen extends StatelessWidget {
   }
 
   Widget _buildHeaderColumn(AnalysisResult result) {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -134,13 +122,10 @@ class CompareScreen extends StatelessWidget {
       text = '${b.productName ?? "Produk B"} kira-kira lebih aman.';
     }
 
-    return Container(
-      width: double.infinity,
+    return AppCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
-      ),
+      backgroundColor: AppColors.primary.withOpacity(0.06),
+      borderColor: Colors.transparent,
       child: Text(
         text,
         style: const TextStyle(
@@ -168,13 +153,9 @@ class CompareScreen extends StatelessWidget {
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Container(
+        child: AppCard(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
-          ),
+          radius: 12,
           child: Row(
             children: [
               Expanded(
