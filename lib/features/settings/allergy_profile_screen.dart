@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/widgets/app_chip.dart';
+import '../../core/widgets/custom_app_bar.dart';
 import '../../services/storage_service.dart';
 
 // ponytail: matching berbasis substring nama, bukan basis data kimia —
@@ -77,15 +79,7 @@ class _AllergyProfileScreenState extends State<AllergyProfileScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text('Profil Alergi'),
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-      ),
+      appBar: const CustomAppBar(title: 'Profil Alergi'),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -104,12 +98,12 @@ class _AllergyProfileScreenState extends State<AllergyProfileScreen> {
             children: _commonAllergens.map((entry) {
               final (label, term) = entry;
               final selected = _profile.contains(term);
-              return FilterChip(
-                label: Text(label),
+              return AppChip(
+                label: label,
+                icon: Icons.warning_amber_rounded,
+                color: AppColors.warningOrange,
                 selected: selected,
-                onSelected: (_) => _toggleCommon(term),
-                selectedColor: AppColors.primary.withOpacity(0.15),
-                checkmarkColor: AppColors.primary,
+                onTap: () => _toggleCommon(term),
               );
             }).toList(),
           ),
@@ -148,8 +142,10 @@ class _AllergyProfileScreenState extends State<AllergyProfileScreen> {
               spacing: 8,
               runSpacing: 8,
               children: customTerms.map((term) {
-                return Chip(
-                  label: Text(term),
+                return AppChip(
+                  label: term,
+                  icon: Icons.warning_amber_rounded,
+                  color: AppColors.warningOrange,
                   onDeleted: () => _removeCustom(term),
                 );
               }).toList(),
