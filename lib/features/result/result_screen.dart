@@ -94,7 +94,7 @@ class _ResultScreenState extends State<ResultScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildOverviewTab(context),
+                    _buildOverviewTab(),
                     _buildIngredientsTab(context),
                   ],
                 ),
@@ -142,49 +142,40 @@ class _ResultScreenState extends State<ResultScreen>
     );
   }
 
-  Widget _buildOverviewTab(BuildContext context) {
+  Widget _buildOverviewTab() {
     final result = _result!;
-    return CustomScrollView(
-      slivers: [
-        SliverOverlapInjector(
-          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.all(20),
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                OverallSafetyIndicator(level: result.overallSafetyLevel)
-                    .animate()
-                    .fadeIn(duration: 400.ms),
-                const SizedBox(height: 16),
-                if (_matchedAllergyIngredients.isNotEmpty) ...[
-                  _buildAllergyBanner(),
-                  const SizedBox(height: 16),
-                ],
-                if (result.overallSafetyNote.isNotEmpty) ...[
-                  _buildSection(
-                    child: Text(
-                      result.overallSafetyNote,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                        height: 1.6,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                _buildSection(
-                  child: ProductSummaryCard(result: result),
-                ).animate().fadeIn(delay: 150.ms),
-                const SizedBox(height: 80),
-              ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          OverallSafetyIndicator(level: result.overallSafetyLevel)
+              .animate()
+              .fadeIn(duration: 400.ms),
+          const SizedBox(height: 16),
+          if (_matchedAllergyIngredients.isNotEmpty) ...[
+            _buildAllergyBanner(),
+            const SizedBox(height: 16),
+          ],
+          if (result.overallSafetyNote.isNotEmpty) ...[
+            _buildSection(
+              child: Text(
+                result.overallSafetyNote,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.6,
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+            const SizedBox(height: 16),
+          ],
+          _buildSection(
+            child: ProductSummaryCard(result: result),
+          ).animate().fadeIn(delay: 150.ms),
+          const SizedBox(height: 80),
+        ],
+      ),
     );
   }
 
