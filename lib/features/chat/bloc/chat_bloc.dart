@@ -59,7 +59,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     required String newMessage,
     required List<ChatMessage> messagesIfFailed,
   }) async {
-    final geminiService = GeminiService(apiKeys: storageService.getApiKeys());
+    final geminiService = GeminiService(apiKeys: storageService.getChatApiKeys());
     try {
       final reply = await geminiService.chat(
         context: result,
