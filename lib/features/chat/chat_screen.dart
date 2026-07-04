@@ -58,19 +58,23 @@ class _ChatScreenState extends State<ChatScreen> {
           return Column(
             children: [
               Expanded(
-                child: state.messages.isEmpty
+                child: state.messages.isEmpty && !state.isSending
                     ? _buildEmptyState()
                     : ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(16),
-                        itemCount: state.messages.length,
-                        itemBuilder: (context, i) =>
-                            _buildBubble(context, state.messages[i]),
+                        itemCount:
+                            state.messages.length + (state.isSending ? 1 : 0),
+                        itemBuilder: (context, i) {
+                          if (i == state.messages.length) {
+                            return _buildTypingIndicator();
+                          }
+                          return _buildBubble(context, state.messages[i]);
+                        },
                       ),
               ),
               if (state.errorMessage != null)
                 _buildErrorBanner(context, state.errorMessage!),
-              if (state.isSending) _buildTypingIndicator(),
               _buildInputBar(context, state),
             ],
           );
@@ -164,21 +168,19 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildTypingIndicator() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceLight,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(3, (i) => _buildTypingDot(i)),
-          ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) => _buildTypingDot(i)),
         ),
       ),
     );
