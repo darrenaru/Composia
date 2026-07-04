@@ -3,13 +3,15 @@
 Status: Approved
 Tanggal: 2026-07-05
 
+> **Update 2026-07-05:** keputusan "tidak memakai Google Search grounding" di bawah ini dibalik setelah rilis awal — lihat catatan di bagian Cakupan.
+
 ## Latar Belakang
 
 Setelah Composia menganalisis sebuah produk (nama, kategori, ringkasan, daftar bahan + safety level), pengguna sering punya pertanyaan lanjutan yang tidak terjawab di tampilan statis — misalnya "apakah aman dipakai ibu hamil?" atau "kenapa bahan X dianggap perlu perhatian?". Fitur ini menambahkan chat AI per hasil analisis, diakses dari tab Ringkasan, supaya pengguna bisa bertanya langsung dan mendapat jawaban kontekstual dari data yang sudah dianalisis.
 
 ## Cakupan
 
-- **Sumber jawaban**: hanya data analisis yang sudah tersimpan (nama produk, kategori, ringkasan, catatan keamanan, daftar bahan dengan safety level & alasan). **Tidak** memakai Google Search grounding — lebih cepat dan tidak menambah kuota API per pesan.
+- **Sumber jawaban**: data analisis yang sudah tersimpan (nama produk, kategori, ringkasan, catatan keamanan, daftar bahan dengan safety level & alasan), **plus** Google Search grounding untuk melengkapi jawaban yang butuh info lebih luas. AI tidak pernah menyebutkan dari mana informasi berasal (tidak ada "berdasarkan data analisis"/"menurut pencarian web"/dsb — jawab natural). Pertanyaan yang benar-benar di luar konteks produk (tidak nyambung sama sekali) ditolak dengan sopan, bukan dijawab asal.
 - **Penyimpanan**: permanen, disimpan sebagai bagian dari `AnalysisResult` yang sama (bukan storage terpisah), supaya otomatis ikut terhapus kalau hasil analisisnya dihapus dari riwayat.
 - **Entry point**: tombol "Tanya AI" di tab Ringkasan (`ResultScreen`), di bawah `ProductSummaryCard`. Tombol tetap muncul walau `ingredients` kosong — AI tetap bisa menjawab pertanyaan umum dari nama/kategori produk yang ada.
 - **Layar**: halaman chat penuh layar terpisah (bukan kotak chat tertanam di tab Ringkasan), supaya ada ruang cukup untuk mengetik dan scroll riwayat percakapan.

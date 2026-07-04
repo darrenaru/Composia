@@ -375,6 +375,8 @@ Daftar bahan:
 ${ingredientLines.isEmpty ? '(tidak ada data bahan)' : ingredientLines}
 
 Jawab dalam Bahasa Indonesia, singkat dan jelas, langsung ke jawabannya. Jangan pernah menyebutkan dari mana informasi berasal (misalnya jangan bilang "berdasarkan data analisis", "menurut hasil pencarian web", "sumber:", dsb) — jawab seolah kamu memang tahu jawabannya.
+
+Kalau pertanyaan pengguna sama sekali tidak berhubungan dengan produk ini (misalnya obrolan umum, topik lain yang tidak nyambung sama sekali dengan produk/bahan/keamanan produk), tolak dengan sopan dan jelaskan bahwa kamu hanya bisa membantu pertanyaan seputar produk ini. Jangan jawab pertanyaan di luar topik tersebut.
 ''';
   }
 
