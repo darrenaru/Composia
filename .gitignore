@@ -29,6 +29,7 @@ ios/Runner.xcworkspace/xcuserdata/
 # IDE
 .idea/
 .vscode/
+.claude/
 *.iml
 
 # OS
