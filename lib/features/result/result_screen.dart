@@ -81,21 +81,26 @@ class _ResultScreenState extends State<ResultScreen>
       backgroundColor: AppColors.background,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxScrolled) => [
-          _buildSliverAppBar(context),
+          SliverOverlapAbsorber(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            sliver: _buildSliverAppBar(context),
+          ),
         ],
-        body: Column(
-          children: [
-            _buildTabBar(),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildOverviewTab(),
-                  _buildIngredientsTab(),
-                ],
+        body: Builder(
+          builder: (context) => Column(
+            children: [
+              _buildTabBar(),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildOverviewTab(context),
+                    _buildIngredientsTab(context),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -137,40 +142,49 @@ class _ResultScreenState extends State<ResultScreen>
     );
   }
 
-  Widget _buildOverviewTab() {
+  Widget _buildOverviewTab(BuildContext context) {
     final result = _result!;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          OverallSafetyIndicator(level: result.overallSafetyLevel)
-              .animate()
-              .fadeIn(duration: 400.ms),
-          const SizedBox(height: 16),
-          if (_matchedAllergyIngredients.isNotEmpty) ...[
-            _buildAllergyBanner(),
-            const SizedBox(height: 16),
-          ],
-          if (result.overallSafetyNote.isNotEmpty) ...[
-            _buildSection(
-              child: Text(
-                result.overallSafetyNote,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                  height: 1.6,
-                ),
-              ),
+    return CustomScrollView(
+      slivers: [
+        SliverOverlapInjector(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OverallSafetyIndicator(level: result.overallSafetyLevel)
+                    .animate()
+                    .fadeIn(duration: 400.ms),
+                const SizedBox(height: 16),
+                if (_matchedAllergyIngredients.isNotEmpty) ...[
+                  _buildAllergyBanner(),
+                  const SizedBox(height: 16),
+                ],
+                if (result.overallSafetyNote.isNotEmpty) ...[
+                  _buildSection(
+                    child: Text(
+                      result.overallSafetyNote,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                _buildSection(
+                  child: ProductSummaryCard(result: result),
+                ).animate().fadeIn(delay: 150.ms),
+                const SizedBox(height: 80),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
-          _buildSection(
-            child: ProductSummaryCard(result: result),
-          ).animate().fadeIn(delay: 150.ms),
-          const SizedBox(height: 80),
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -204,7 +218,7 @@ class _ResultScreenState extends State<ResultScreen>
     );
   }
 
-  Widget _buildIngredientsTab() {
+  Widget _buildIngredientsTab(BuildContext context) {
     final result = _result!;
     if (result.ingredients.isEmpty) {
       return Column(
@@ -222,6 +236,9 @@ class _ResultScreenState extends State<ResultScreen>
       // ignore: deprecated_member_use
       cacheExtent: 600,
       slivers: [
+        SliverOverlapInjector(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        ),
         SliverPersistentHeader(
           pinned: true,
           delegate: _FilterBarDelegate(_buildFilterBar()),
