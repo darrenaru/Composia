@@ -206,26 +206,41 @@ class _ResultScreenState extends State<ResultScreen>
 
   Widget _buildIngredientsTab() {
     final result = _result!;
-    return Column(
-      children: [
-        _buildFilterBar(),
-        Expanded(
-          child: result.ingredients.isEmpty
-              ? _buildEmptyIngredients()
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
-                  itemCount: _filteredIngredients.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, i) {
-                    final ingredient = _filteredIngredients[i];
-                    return IngredientCard(
-                      ingredient: ingredient,
-                      index: i,
-                      matchesAllergyProfile: ingredientMatchesAllergyProfile(
-                          ingredient, _allergyProfile),
-                    );
-                  },
-                ),
+    if (result.ingredients.isEmpty) {
+      return Column(
+        children: [
+          _buildFilterBar(),
+          Expanded(child: _buildEmptyIngredients()),
+        ],
+      );
+    }
+
+    return CustomScrollView(
+      // Bangun kartu sedikit di luar viewport lebih dulu supaya tidak ada
+      // jeda kosong saat scroll cepat (dulu ditutupi animasi fade-in per item,
+      // yang justru bikin pop-in terlihat tiap kartu baru di-build).
+      // ignore: deprecated_member_use
+      cacheExtent: 600,
+      slivers: [
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _FilterBarDelegate(_buildFilterBar()),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+          sliver: SliverList.separated(
+            itemCount: _filteredIngredients.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, i) {
+              final ingredient = _filteredIngredients[i];
+              return IngredientCard(
+                key: ValueKey(ingredient.name),
+                ingredient: ingredient,
+                matchesAllergyProfile: ingredientMatchesAllergyProfile(
+                    ingredient, _allergyProfile),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -348,5 +363,28 @@ class _ResultScreenState extends State<ResultScreen>
         ],
       ),
     );
+  }
+}
+
+class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  const _FilterBarDelegate(this.child);
+
+  static const double _height = 54;
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox(height: _height, child: child);
+  }
+
+  @override
+  bool shouldRebuild(covariant _FilterBarDelegate oldDelegate) {
+    return oldDelegate.child != child;
   }
 }

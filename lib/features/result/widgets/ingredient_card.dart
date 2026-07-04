@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/ingredient.dart';
 import 'safety_badge.dart';
 
 class IngredientCard extends StatefulWidget {
   final Ingredient ingredient;
-  final int index;
   final VoidCallback? onTap;
   final bool matchesAllergyProfile;
 
   const IngredientCard({
     super.key,
     required this.ingredient,
-    required this.index,
     this.onTap,
     this.matchesAllergyProfile = false,
   });
@@ -77,10 +74,7 @@ class _IngredientCardState extends State<IngredientCard> {
           ],
         ),
       ),
-    )
-        .animate()
-        .fadeIn(delay: Duration(milliseconds: widget.index * 50))
-        .slideY(begin: 0.05, end: 0, delay: Duration(milliseconds: widget.index * 50));
+    );
   }
 
   Widget _buildHeader() {
