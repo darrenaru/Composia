@@ -90,7 +90,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       return 'API Key tidak valid. Periksa kembali API Key di Pengaturan.';
     }
     if (e.isRateLimitError) {
-      return 'Terlalu banyak permintaan. Tunggu sebentar dan coba lagi.';
+      return e.rateLimitMessage;
     }
     return 'Gagal mengirim pesan: ${e.message}';
   }

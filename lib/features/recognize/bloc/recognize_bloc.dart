@@ -108,7 +108,7 @@ class RecognizeBloc extends Bloc<RecognizeEvent, RecognizeState> {
       return 'API Key tidak valid. Periksa kembali API Key di Pengaturan.';
     }
     if (e.isRateLimitError) {
-      return 'Terlalu banyak permintaan. Tunggu sebentar dan coba lagi.';
+      return e.rateLimitMessage;
     }
     return 'Gagal menganalisis: ${e.message}';
   }

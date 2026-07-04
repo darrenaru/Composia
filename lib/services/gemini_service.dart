@@ -58,6 +58,36 @@ class GeminiService {
     return lastResponse!;
   }
 
+  // error.details berisi RetryInfo.retryDelay (mis. "17s") kalau kena
+  // limit per-menit — dipakai supaya pesan error bisa kasih tahu berapa
+  // lama harus menunggu, bukan cuma "coba lagi" generik.
+  GeminiException _exceptionFromResponse(http.Response response) {
+    final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final error = errorBody['error'] as Map<String, dynamic>?;
+    final errorMsg =
+        error?['message'] as String? ?? 'API Error ${response.statusCode}';
+
+    int? retryDelaySeconds;
+    final details = error?['details'] as List<dynamic>?;
+    if (details != null) {
+      for (final detail in details) {
+        final map = detail as Map<String, dynamic>;
+        if ((map['@type'] as String? ?? '').contains('RetryInfo')) {
+          final delay = map['retryDelay'] as String?;
+          final seconds = double.tryParse(delay?.replaceAll('s', '') ?? '');
+          if (seconds != null) retryDelaySeconds = seconds.ceil();
+          break;
+        }
+      }
+    }
+
+    return GeminiException(
+      errorMsg,
+      response.statusCode,
+      retryDelaySeconds: retryDelaySeconds,
+    );
+  }
+
   Future<AnalysisResult> analyzeIngredients({
     required File imageFile,
     required String resultId,
@@ -89,12 +119,7 @@ class GeminiService {
     final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
-      final errorMsg =
-          (errorBody['error'] as Map<String, dynamic>?)?['message']
-                  as String? ??
-              'API Error ${response.statusCode}';
-      throw GeminiException(errorMsg, response.statusCode);
+      throw _exceptionFromResponse(response);
     }
 
     final responseData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -134,12 +159,7 @@ class GeminiService {
     final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
-      final errorMsg =
-          (errorBody['error'] as Map<String, dynamic>?)?['message']
-                  as String? ??
-              'API Error ${response.statusCode}';
-      throw GeminiException(errorMsg, response.statusCode);
+      throw _exceptionFromResponse(response);
     }
 
     final responseData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -227,12 +247,7 @@ Use "low" confidence in case (B) if the packaging text is unclear, partially obs
     final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
-      final errorMsg =
-          (errorBody['error'] as Map<String, dynamic>?)?['message']
-                  as String? ??
-              'API Error ${response.statusCode}';
-      throw GeminiException(errorMsg, response.statusCode);
+      throw _exceptionFromResponse(response);
     }
 
     final responseData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -341,12 +356,7 @@ Use "low" confidence in case (B) if the packaging text is unclear, partially obs
     final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
-      final errorMsg =
-          (errorBody['error'] as Map<String, dynamic>?)?['message']
-                  as String? ??
-              'API Error ${response.statusCode}';
-      throw GeminiException(errorMsg, response.statusCode);
+      throw _exceptionFromResponse(response);
     }
 
     final responseData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -506,12 +516,21 @@ Analyze ALL visible ingredients. Be thorough and accurate. Return Indonesian lan
 class GeminiException implements Exception {
   final String message;
   final int statusCode;
+  final int? retryDelaySeconds;
 
-  const GeminiException(this.message, this.statusCode);
+  const GeminiException(this.message, this.statusCode, {this.retryDelaySeconds});
 
   bool get isAuthError => statusCode == 400 || statusCode == 403;
   bool get isRateLimitError => statusCode == 429;
   bool get isServerError => statusCode >= 500;
+
+  // Google mengirim retryDelay (dari RetryInfo di error.details) hanya untuk
+  // limit per-menit yang jendelanya pendek — limit harian (RPD) biasanya
+  // tidak menyertakan retryDelay karena resetnya di tengah malam Pacific
+  // Time, bukan hitungan detik. Kalau tidak ada, pakai pesan generik.
+  String get rateLimitMessage => retryDelaySeconds != null
+      ? 'Terlalu banyak permintaan. Coba lagi dalam $retryDelaySeconds detik.'
+      : 'Terlalu banyak permintaan. Tunggu sebentar dan coba lagi.';
 
   @override
   String toString() => 'GeminiException($statusCode): $message';

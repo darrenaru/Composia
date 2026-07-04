@@ -93,9 +93,7 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
           isApiKeyError: true,
         ));
       } else if (e.isRateLimitError) {
-        emit(const ScanError(
-          'Terlalu banyak permintaan. Tunggu sebentar dan coba lagi.',
-        ));
+        emit(ScanError(e.rateLimitMessage));
       } else {
         emit(ScanError('Gagal menganalisis: ${e.message}'));
       }
