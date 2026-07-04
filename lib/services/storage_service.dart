@@ -13,12 +13,14 @@ class StorageService {
   // bukan hardcode, supaya tidak ke-commit ke git. Siapapun yang punya APK
   // hasil build tetap bisa mengekstrak key dari binary — ganti ke server
   // proxy kalau APK ini bakal disebar lebih luas dari sekadar teman dekat.
-  // GEMINI_API_KEY_2 opsional — key dari akun Google terpisah, dipakai
-  // sebagai fallback kalau key pertama kena rate limit (429).
+  // GEMINI_API_KEY_2/_3 opsional — key dari akun Google terpisah, dipakai
+  // sebagai fallback kalau key sebelumnya kena rate limit (429).
   static const String _defaultApiKey =
       String.fromEnvironment('GEMINI_API_KEY');
-  static const String _fallbackApiKey =
+  static const String _fallbackApiKey2 =
       String.fromEnvironment('GEMINI_API_KEY_2');
+  static const String _fallbackApiKey3 =
+      String.fromEnvironment('GEMINI_API_KEY_3');
   static const String _historyKey = 'composia_history';
   static const String _onboardingKey = 'composia_onboarding_done';
   static const String _languageKey = 'composia_language';
@@ -35,8 +37,9 @@ class StorageService {
 
   // API Key — ditanam langsung, tidak ada UI untuk isi/ubah manual.
   // Urutan menentukan urutan fallback saat kena rate limit.
-  List<String> getApiKeys() =>
-      [_defaultApiKey, _fallbackApiKey].where((k) => k.isNotEmpty).toList();
+  List<String> getApiKeys() => [_defaultApiKey, _fallbackApiKey2, _fallbackApiKey3]
+      .where((k) => k.isNotEmpty)
+      .toList();
 
   static const String _allergyProfileKey = 'composia_allergy_profile';
 
