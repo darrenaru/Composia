@@ -5,6 +5,8 @@ import '../features/compare/compare_screen.dart';
 import '../features/history/history_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../features/recognize/bloc/recognize_bloc.dart';
+import '../features/recognize/recognize_screen.dart';
 import '../features/result/result_screen.dart';
 import '../features/scan/bloc/scan_bloc.dart';
 import '../features/scan/scan_screen.dart';
@@ -41,6 +43,13 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (_) => ScanBloc(storageService: storageService),
           child: const ScanScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/recognize',
+        builder: (context, state) => BlocProvider(
+          create: (_) => RecognizeBloc(storageService: storageService),
+          child: const RecognizeScreen(),
         ),
       ),
       GoRoute(

@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _pushScan(BuildContext context) {
-    context.push('/scan').then((_) => _loadHistory());
+    context.push('/recognize').then((_) => _loadHistory());
   }
 
   @override
