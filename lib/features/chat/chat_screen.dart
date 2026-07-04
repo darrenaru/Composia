@@ -110,16 +110,56 @@ class _ChatScreenState extends State<ChatScreen> {
           borderRadius: BorderRadius.circular(16),
           border: isUser ? null : Border.all(color: AppColors.border),
         ),
-        child: Text(
-          message.text,
-          style: TextStyle(
-            color: isUser ? Colors.white : AppColors.textPrimary,
-            fontSize: 14,
-            height: 1.4,
+        child: Text.rich(
+          TextSpan(
+            children: _parseInlineMarkdown(
+              message.text,
+              TextStyle(
+                color: isUser ? Colors.white : AppColors.textPrimary,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
           ),
         ),
       ),
     );
+  }
+
+  // ponytail: parser inline minimal (bold **x**, italic *x*) — jawaban chat
+  // cuma perlu penekanan kata, bukan markdown dokumen penuh (heading, list,
+  // code block, dll), jadi tidak perlu package markdown penuh.
+  List<InlineSpan> _parseInlineMarkdown(String text, TextStyle baseStyle) {
+    final pattern = RegExp(r'\*\*(.+?)\*\*|\*(.+?)\*');
+    final spans = <InlineSpan>[];
+    var last = 0;
+    for (final match in pattern.allMatches(text)) {
+      if (match.start > last) {
+        spans.add(TextSpan(text: text.substring(last, match.start)));
+      }
+      if (match.group(1) != null) {
+        spans.add(TextSpan(
+          text: match.group(1),
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ));
+      } else if (match.group(2) != null) {
+        spans.add(TextSpan(
+          text: match.group(2),
+          style: const TextStyle(fontStyle: FontStyle.italic),
+        ));
+      }
+      last = match.end;
+    }
+    if (last < text.length) {
+      spans.add(TextSpan(text: text.substring(last)));
+    }
+    return [
+      for (final span in spans)
+        TextSpan(
+          text: (span as TextSpan).text,
+          style: baseStyle.merge(span.style),
+        ),
+    ];
   }
 
   Widget _buildTypingIndicator() {
