@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/analysis_result.dart';
+import '../models/chat_message.dart';
 import '../models/ingredient.dart';
 import '../core/utils/image_utils.dart';
 
@@ -297,6 +298,79 @@ Use "low" confidence in case (B) if the packaging text is unclear, partially obs
     if (text.trim().isEmpty || isCompositionNotFound(text)) return null;
 
     return text.trim();
+  }
+
+  Future<String> chat({
+    required AnalysisResult context,
+    required List<ChatMessage> history,
+    required String newMessage,
+  }) async {
+    final contents = [
+      {
+        'role': 'user',
+        'parts': [
+          {'text': _buildChatContextPrompt(context)},
+        ],
+      },
+      {
+        'role': 'model',
+        'parts': [
+          {'text': 'Baik, saya siap menjawab pertanyaan tentang produk ini.'},
+        ],
+      },
+      ...history.map((m) => {
+            'role': m.role == ChatRole.user ? 'user' : 'model',
+            'parts': [
+              {'text': m.text},
+            ],
+          }),
+      {
+        'role': 'user',
+        'parts': [
+          {'text': newMessage},
+        ],
+      },
+    ];
+
+    final requestBody = {'contents': contents};
+    final response = await _post(requestBody);
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      final errorMsg =
+          (errorBody['error'] as Map<String, dynamic>?)?['message']
+                  as String? ??
+              'API Error ${response.statusCode}';
+      throw GeminiException(errorMsg, response.statusCode);
+    }
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+    final candidates = responseData['candidates'] as List<dynamic>;
+    final parts =
+        (candidates.first as Map<String, dynamic>)['content']['parts']
+            as List<dynamic>;
+    return (parts.first as Map<String, dynamic>)['text'] as String;
+  }
+
+  String _buildChatContextPrompt(AnalysisResult context) {
+    final ingredientLines = context.ingredients
+        .map((i) => '- ${i.name} (level: ${i.safetyLevel.name}): ${i.safetyReason}')
+        .join('\n');
+
+    return '''
+Kamu adalah asisten yang membantu pengguna memahami hasil analisis produk berikut. Jawab HANYA berdasarkan data di bawah ini. Kalau pertanyaan pengguna di luar data yang tersedia, katakan dengan jujur bahwa informasi itu tidak ada dalam hasil analisis ini.
+
+Nama produk: ${context.productName ?? 'Tidak diketahui'}
+Kategori: ${context.category.name}
+Ringkasan: ${context.summary}
+Catatan keamanan keseluruhan: ${context.overallSafetyNote}
+Rekomendasi: ${context.recommendation ?? '-'}
+
+Daftar bahan:
+${ingredientLines.isEmpty ? '(tidak ada data bahan)' : ingredientLines}
+
+Jawab dalam Bahasa Indonesia, singkat dan jelas.
+''';
   }
 
   String _buildAnalysisPrompt() {
