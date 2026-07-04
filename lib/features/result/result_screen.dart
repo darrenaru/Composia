@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/utils/allergy_matcher.dart';
 import '../../models/analysis_result.dart';
 import '../../models/ingredient.dart';
 import '../../services/storage_service.dart';
@@ -29,6 +30,7 @@ class _ResultScreenState extends State<ResultScreen>
   late TabController _tabController;
   AnalysisResult? _result;
   SafetyLevel? _filterLevel;
+  List<String> _allergyProfile = [];
 
   @override
   void initState() {
@@ -45,7 +47,17 @@ class _ResultScreenState extends State<ResultScreen>
 
   void _loadResult() {
     final result = widget.storageService.getResultById(widget.resultId);
-    setState(() => _result = result);
+    setState(() {
+      _result = result;
+      _allergyProfile = widget.storageService.getAllergyProfile();
+    });
+  }
+
+  List<Ingredient> get _matchedAllergyIngredients {
+    if (_result == null || _allergyProfile.isEmpty) return [];
+    return _result!.ingredients
+        .where((i) => ingredientMatchesAllergyProfile(i, _allergyProfile))
+        .toList();
   }
 
   List<Ingredient> get _filteredIngredients {
@@ -136,6 +148,10 @@ class _ResultScreenState extends State<ResultScreen>
               .animate()
               .fadeIn(duration: 400.ms),
           const SizedBox(height: 16),
+          if (_matchedAllergyIngredients.isNotEmpty) ...[
+            _buildAllergyBanner(),
+            const SizedBox(height: 16),
+          ],
           if (result.overallSafetyNote.isNotEmpty) ...[
             _buildSection(
               child: Text(
@@ -158,6 +174,36 @@ class _ResultScreenState extends State<ResultScreen>
     );
   }
 
+  Widget _buildAllergyBanner() {
+    final names = _matchedAllergyIngredients.map((i) => i.name).join(', ');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.dangerRedLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.dangerRed.withOpacity(0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: AppColors.dangerRed),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '${_matchedAllergyIngredients.length} bahan cocok dengan profil alergimu: $names',
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildIngredientsTab() {
     final result = _result!;
     return Column(
@@ -171,9 +217,12 @@ class _ResultScreenState extends State<ResultScreen>
                   itemCount: _filteredIngredients.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, i) {
+                    final ingredient = _filteredIngredients[i];
                     return IngredientCard(
-                      ingredient: _filteredIngredients[i],
+                      ingredient: ingredient,
                       index: i,
+                      matchesAllergyProfile: ingredientMatchesAllergyProfile(
+                          ingredient, _allergyProfile),
                     );
                   },
                 ),

@@ -8,12 +8,14 @@ class IngredientCard extends StatefulWidget {
   final Ingredient ingredient;
   final int index;
   final VoidCallback? onTap;
+  final bool matchesAllergyProfile;
 
   const IngredientCard({
     super.key,
     required this.ingredient,
     required this.index,
     this.onTap,
+    this.matchesAllergyProfile = false,
   });
 
   @override
@@ -48,10 +50,10 @@ class _IngredientCardState extends State<IngredientCard> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _expanded
-                ? _levelColor.withOpacity(0.3)
-                : AppColors.border,
-            width: _expanded ? 1.5 : 1,
+            color: widget.matchesAllergyProfile
+                ? AppColors.dangerRed
+                : (_expanded ? _levelColor.withOpacity(0.3) : AppColors.border),
+            width: widget.matchesAllergyProfile ? 2 : (_expanded ? 1.5 : 1),
           ),
           boxShadow: [
             BoxShadow(
@@ -99,38 +101,30 @@ class _IngredientCardState extends State<IngredientCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.ingredient.name,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    if (widget.ingredient.isCommonAllergen)
-                      Container(
-                        margin: const EdgeInsets.only(left: 6),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.warningOrangeLight,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'Alergen',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.warningOrange,
-                          ),
-                        ),
-                      ),
-                  ],
+                Text(
+                  widget.ingredient.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
+                if (widget.matchesAllergyProfile ||
+                    widget.ingredient.isCommonAllergen) ...[
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      if (widget.matchesAllergyProfile)
+                        _buildBadge('Cocok Profil Alergimu',
+                            AppColors.dangerRed, AppColors.dangerRedLight),
+                      if (widget.ingredient.isCommonAllergen)
+                        _buildBadge('Alergen', AppColors.warningOrange,
+                            AppColors.warningOrangeLight),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 3),
                 Text(
                   widget.ingredient.function,
@@ -157,6 +151,24 @@ class _IngredientCardState extends State<IngredientCard> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBadge(String label, Color color, Color bgColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
       ),
     );
   }
