@@ -8,10 +8,9 @@
 
 2. **Android Studio** atau **VS Code** dengan ekstensi Flutter
 
-3. **API Key Anthropic (Claude)**
-   - Daftar di: https://console.anthropic.com
+3. **API Key Gemini**
+   - Daftar di: https://aistudio.google.com/apikey
    - Buat API Key baru
-   - Format: `sk-ant-api03-...`
 
 ## Instalasi
 
@@ -25,8 +24,8 @@ flutter pub get
 # 3. Periksa setup Flutter
 flutter doctor
 
-# 4. Jalankan di emulator/perangkat
-flutter run
+# 4. Jalankan di emulator/perangkat (key wajib disertakan via --dart-define)
+flutter run --dart-define=GEMINI_API_KEY=your_key_here
 ```
 
 ## Struktur Proyek
@@ -52,7 +51,7 @@ lib/
 │   ├── ingredient.dart          # Model bahan + safety level
 │   └── analysis_result.dart     # Hasil analisis produk
 ├── services/
-│   ├── claude_service.dart      # Integrasi Claude API
+│   ├── gemini_service.dart      # Integrasi Gemini API
 │   └── storage_service.dart     # Penyimpanan lokal (SharedPreferences)
 └── router/
     └── app_router.dart          # GoRouter navigation
@@ -81,22 +80,22 @@ lib/
 
 ## Konfigurasi API Key
 
-1. Buka aplikasi → Pengaturan (ikon gear di sudut kanan atas)
-2. Masukkan API Key Anthropic kamu
-3. Tekan "Simpan API Key"
-4. Selesai! Kamu siap menganalisis produk.
+Key Gemini ditanam saat build lewat `--dart-define`, bukan diketik manual di
+aplikasi (tidak ada UI untuk itu). Simpan key kamu di password manager atau
+file lokal yang **tidak** ditrack git (jangan pernah taruh literal key di
+kode/commit — GitHub akan menolak push yang mengandung secret).
 
 ## Build Release
 
 ```bash
-# Android APK
-flutter build apk --release
+# Android APK — untuk dibagikan ke teman
+flutter build apk --release --dart-define=GEMINI_API_KEY=your_key_here
 
 # Android App Bundle (untuk Play Store)
-flutter build appbundle --release
+flutter build appbundle --release --dart-define=GEMINI_API_KEY=your_key_here
 
 # iOS (hanya di macOS)
-flutter build ios --release
+flutter build ios --release --dart-define=GEMINI_API_KEY=your_key_here
 ```
 
 ## Troubleshooting

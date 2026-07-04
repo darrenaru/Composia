@@ -2,11 +2,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/analysis_result.dart';
 
 class StorageService {
-  // ponytail: key ditanam agar teman tak perlu isi manual; siapapun yang
-  // punya APK ini bisa mengekstrak key. Ganti ke server proxy kalau APK
-  // ini bakal disebar lebih luas dari sekadar teman dekat.
+  // ponytail: key masuk lewat --dart-define saat build (lihat SETUP.md),
+  // bukan hardcode, supaya tidak ke-commit ke git. Siapapun yang punya APK
+  // hasil build tetap bisa mengekstrak key dari binary — ganti ke server
+  // proxy kalau APK ini bakal disebar lebih luas dari sekadar teman dekat.
   static const String _defaultApiKey =
-      'REDACTED_SEE_DART_DEFINE';
+      String.fromEnvironment('GEMINI_API_KEY');
   static const String _historyKey = 'composia_history';
   static const String _onboardingKey = 'composia_onboarding_done';
   static const String _languageKey = 'composia_language';

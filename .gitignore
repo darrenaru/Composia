@@ -34,3 +34,7 @@ ios/Runner.xcworkspace/xcuserdata/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local scripts holding the real Gemini API key — never commit these
+run_local.sh
+build_local.sh
