@@ -79,49 +79,35 @@ class _ResultScreenState extends State<ResultScreen>
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxScrolled) => [
-          SliverOverlapAbsorber(
-            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            sliver: _buildSliverAppBar(context),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => context.go('/home'),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+        title: const Text(AppStrings.resultTitle),
+        actions: [
+          IconButton(
+            onPressed: _showOptions,
+            icon: const Icon(Icons.more_vert_rounded),
           ),
         ],
-        body: Builder(
-          builder: (context) => Column(
-            children: [
-              _buildTabBar(),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildOverviewTab(),
-                    _buildIngredientsTab(context),
-                  ],
-                ),
-              ),
-            ],
+      ),
+      body: Column(
+        children: [
+          _buildTabBar(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildOverviewTab(),
+                _buildIngredientsTab(),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildSliverAppBar(BuildContext context) {
-    return SliverAppBar(
-      pinned: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        onPressed: () => context.go('/home'),
-        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-      ),
-      title: const Text(AppStrings.resultTitle),
-      actions: [
-        IconButton(
-          onPressed: _showOptions,
-          icon: const Icon(Icons.more_vert_rounded),
-        ),
-      ],
     );
   }
 
@@ -209,7 +195,7 @@ class _ResultScreenState extends State<ResultScreen>
     );
   }
 
-  Widget _buildIngredientsTab(BuildContext context) {
+  Widget _buildIngredientsTab() {
     final result = _result!;
     if (result.ingredients.isEmpty) {
       return Column(
@@ -227,9 +213,6 @@ class _ResultScreenState extends State<ResultScreen>
       // ignore: deprecated_member_use
       cacheExtent: 600,
       slivers: [
-        SliverOverlapInjector(
-          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-        ),
         SliverPersistentHeader(
           pinned: true,
           delegate: _FilterBarDelegate(_buildFilterBar()),
