@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildInfoRow(
             Icons.psychology_rounded,
             'Model AI',
-            'Gemini 3.5 Flash',
+            'Gemini 2.5 Flash',
           ),
           const Divider(height: 24, color: AppColors.divider),
           _buildInfoRow(
