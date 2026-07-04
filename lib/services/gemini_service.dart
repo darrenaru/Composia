@@ -31,7 +31,7 @@ class NeedsLookupResult extends PhotoAnalysisResult {
 }
 
 class GeminiService {
-  static const String _model = 'gemini-2.5-flash';
+  static const String _model = 'gemini-3.5-flash';
   static const String _baseUrl =
       'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent';
 

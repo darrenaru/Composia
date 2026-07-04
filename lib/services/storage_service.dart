@@ -1,7 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/analysis_result.dart';
 
 class StorageService {
+  // ponytail: shell branches (Home/History) tetap hidup di background lewat
+  // StatefulShellRoute.indexedStack, jadi context.go('/home') tidak lagi
+  // membangun ulang layarnya. Notifier ini yang memberi tahu mereka untuk
+  // refresh saat riwayat berubah dari layar lain (Recognize/Result/Settings).
+  final ValueNotifier<int> historyChanged = ValueNotifier(0);
+
   // ponytail: key masuk lewat --dart-define saat build (lihat SETUP.md),
   // bukan hardcode, supaya tidak ke-commit ke git. Siapapun yang punya APK
   // hasil build tetap bisa mengekstrak key dari binary — ganti ke server
@@ -83,6 +90,7 @@ class StorageService {
     final trimmed = history.take(_maxHistoryItems).toList();
     final jsonList = trimmed.map((r) => r.toJsonString()).toList();
     await _prefs.setStringList(_historyKey, jsonList);
+    historyChanged.value++;
   }
 
   Future<void> removeFromHistory(String id) async {
@@ -90,9 +98,13 @@ class StorageService {
     history.removeWhere((r) => r.id == id);
     final jsonList = history.map((r) => r.toJsonString()).toList();
     await _prefs.setStringList(_historyKey, jsonList);
+    historyChanged.value++;
   }
 
-  Future<void> clearHistory() => _prefs.remove(_historyKey);
+  Future<void> clearHistory() async {
+    await _prefs.remove(_historyKey);
+    historyChanged.value++;
+  }
 
   AnalysisResult? getResultById(String id) {
     try {

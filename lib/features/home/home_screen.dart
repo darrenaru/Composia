@@ -29,6 +29,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadHistory();
+    widget.storageService.historyChanged.addListener(_loadHistory);
+  }
+
+  @override
+  void dispose() {
+    widget.storageService.historyChanged.removeListener(_loadHistory);
+    super.dispose();
   }
 
   void _loadHistory() {
