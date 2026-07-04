@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/widgets/custom_app_bar.dart';
+import '../../core/widgets/custom_button.dart';
+import '../../core/widgets/scan_result_card.dart';
 import '../../models/analysis_result.dart';
 import '../../services/storage_service.dart';
-import '../result/widgets/safety_badge.dart';
 
 class HistoryScreen extends StatefulWidget {
   final StorageService storageService;
@@ -99,14 +101,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(AppStrings.historyTitle),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
+      appBar: CustomAppBar(
+        title: AppStrings.historyTitle,
         actions: [
           if (_history.length >= 2)
             IconButton(
@@ -131,19 +127,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ? SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: ElevatedButton(
+                child: PrimaryButton(
+                  label: 'Bandingkan (2)',
                   onPressed: _goToCompare,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: const Text(
-                    'Bandingkan (2)',
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w700),
-                  ),
                 ),
               ),
             )
@@ -218,10 +204,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
               final result = entry.value;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: _HistoryCard(
+                child: ScanResultCard(
                   result: result,
                   selectionMode: _selectionMode,
                   selected: _selectedIds.contains(result.id),
+                  dismissible: true,
+                  showRelativeDate: false,
                   onTap: _selectionMode
                       ? () => _toggleSelected(result.id)
                       : () => context
@@ -266,146 +254,3 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-class _HistoryCard extends StatelessWidget {
-  final AnalysisResult result;
-  final VoidCallback? onTap;
-  final VoidCallback? onDelete;
-  final bool selectionMode;
-  final bool selected;
-
-  const _HistoryCard({
-    required this.result,
-    this.onTap,
-    this.onDelete,
-    this.selectionMode = false,
-    this.selected = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final card = GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            if (selectionMode) ...[
-              Icon(
-                selected
-                    ? Icons.check_circle_rounded
-                    : Icons.circle_outlined,
-                color: selected ? AppColors.primary : AppColors.textHint,
-              ),
-              const SizedBox(width: 12),
-            ],
-            _buildIcon(),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    result.productName ?? 'Produk Tanpa Nama',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${result.ingredients.length} bahan • ${DateFormat('HH:mm').format(result.analyzedAt)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            SafetyBadge(level: result.overallSafetyLevel, compact: true),
-          ],
-        ),
-      ),
-    );
-
-    if (selectionMode) return card;
-
-    return Dismissible(
-      key: Key(result.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete?.call(),
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: AppColors.dangerRed,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.delete_rounded, color: Colors.white),
-      ),
-      child: card,
-    );
-  }
-
-  Widget _buildIcon() {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: _color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(_icon, color: _color, size: 24),
-    );
-  }
-
-  IconData get _icon {
-    switch (result.category) {
-      case ProductCategory.medicine:
-        return Icons.medication_rounded;
-      case ProductCategory.cosmetics:
-        return Icons.face_retouching_natural_rounded;
-      case ProductCategory.skincare:
-        return Icons.spa_rounded;
-      case ProductCategory.babyProduct:
-        return Icons.child_care_rounded;
-      case ProductCategory.supplement:
-        return Icons.health_and_safety_rounded;
-      case ProductCategory.personalCare:
-        return Icons.self_improvement_rounded;
-      default:
-        return Icons.inventory_2_rounded;
-    }
-  }
-
-  Color get _color {
-    switch (result.category) {
-      case ProductCategory.medicine:
-        return const Color(0xFF6C5CE7);
-      case ProductCategory.cosmetics:
-        return const Color(0xFFFF7675);
-      case ProductCategory.skincare:
-        return const Color(0xFF00B894);
-      case ProductCategory.babyProduct:
-        return const Color(0xFFFDCB6E);
-      case ProductCategory.supplement:
-        return const Color(0xFF74B9FF);
-      case ProductCategory.personalCare:
-        return const Color(0xFFE17055);
-      default:
-        return AppColors.primary;
-    }
-  }
-}
