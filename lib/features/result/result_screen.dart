@@ -203,6 +203,18 @@ class _ResultScreenState extends State<ResultScreen>
         ],
       );
     }
+    if (_filteredIngredients.isEmpty) {
+      return Column(
+        children: [
+          _buildFilterBar(),
+          Expanded(
+            child: _buildEmptyIngredients(
+              message: 'Tidak ada bahan dengan level ini',
+            ),
+          ),
+        ],
+      );
+    }
 
     return CustomScrollView(
       // Bangun kartu sedikit di luar viewport lebih dulu supaya tidak ada
@@ -269,17 +281,17 @@ class _ResultScreenState extends State<ResultScreen>
     );
   }
 
-  Widget _buildEmptyIngredients() {
-    return const Center(
+  Widget _buildEmptyIngredients({
+    String message = 'Tidak ada bahan yang ditemukan',
+  }) {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off_rounded, size: 48, color: AppColors.textHint),
-          SizedBox(height: 12),
-          Text(
-            'Tidak ada bahan yang ditemukan',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
+          const Icon(Icons.search_off_rounded,
+              size: 48, color: AppColors.textHint),
+          const SizedBox(height: 12),
+          Text(message, style: const TextStyle(color: AppColors.textSecondary)),
         ],
       ),
     );
