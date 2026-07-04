@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/widgets/custom_app_bar.dart';
 import '../../core/widgets/custom_button.dart';
 import '../../core/widgets/loading_overlay.dart';
 import 'bloc/scan_bloc.dart';
@@ -28,15 +29,7 @@ class ScanScreen extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const Text(AppStrings.scanTitle),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          ),
-        ),
+        appBar: const CustomAppBar(title: AppStrings.scanTitle),
         body: BlocBuilder<ScanBloc, ScanState>(
           builder: (context, state) {
             return Stack(

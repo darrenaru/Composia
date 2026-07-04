@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/allergy_matcher.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/app_chip.dart';
+import '../../core/widgets/custom_app_bar.dart';
 import '../../models/analysis_result.dart';
 import '../../models/ingredient.dart';
 import '../../services/storage_service.dart';
@@ -72,21 +75,16 @@ class _ResultScreenState extends State<ResultScreen>
   Widget build(BuildContext context) {
     if (_result == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text(AppStrings.resultTitle)),
+        appBar: const CustomAppBar(title: AppStrings.resultTitle),
         body: const Center(child: Text('Hasil tidak ditemukan')),
       );
     }
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => context.go('/home'),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-        title: const Text(AppStrings.resultTitle),
+      appBar: CustomAppBar(
+        title: AppStrings.resultTitle,
+        onBack: () => context.go('/home'),
         actions: [
           IconButton(
             onPressed: _showOptions,
@@ -255,34 +253,14 @@ class _ResultScreenState extends State<ResultScreen>
         child: Row(
           children: levels.map((level) {
             final isSelected = _filterLevel == level.$1;
-            return GestureDetector(
-              onTap: () => setState(() => _filterLevel = level.$1),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 7),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? level.$3.withOpacity(0.12)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? level.$3
-                        : AppColors.border,
-                    width: isSelected ? 1.5 : 1,
-                  ),
-                ),
-                child: Text(
-                  level.$2,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? level.$3 : AppColors.textSecondary,
-                  ),
-                ),
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: AppChip(
+                label: level.$2,
+                color: level.$3,
+                selected: isSelected,
+                showIcon: false,
+                onTap: () => setState(() => _filterLevel = level.$1),
               ),
             );
           }).toList(),
@@ -308,16 +286,7 @@ class _ResultScreenState extends State<ResultScreen>
   }
 
   Widget _buildSection({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: child,
-    );
+    return AppCard(padding: const EdgeInsets.all(18), child: child);
   }
 
   void _showOptions() {

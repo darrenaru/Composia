@@ -39,3 +39,6 @@ Thumbs.db
 # Local scripts holding the real Gemini API key — never commit these
 run_local.sh
 build_local.sh
+
+# Claude Code conversation exports (/export command)
+/????-??-??-*.txt

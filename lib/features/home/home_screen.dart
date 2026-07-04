@@ -3,10 +3,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/constants/category_style.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/app_chip.dart';
+import '../../core/widgets/custom_button.dart';
+import '../../core/widgets/scan_result_card.dart';
 import '../../models/analysis_result.dart';
 import '../../services/storage_service.dart';
-import 'widgets/category_chip.dart';
-import 'widgets/history_preview_card.dart';
 import 'widgets/tip_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -140,13 +143,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategories() {
-    final categories = [
-      (AppStrings.categoryMedicine, Icons.medication_rounded, const Color(0xFF6C5CE7)),
-      (AppStrings.categoryCosmetics, Icons.face_retouching_natural_rounded, const Color(0xFFFF7675)),
-      (AppStrings.categorySkincare, Icons.spa_rounded, const Color(0xFF00B894)),
-      (AppStrings.categoryBabyProduct, Icons.child_care_rounded, const Color(0xFFFDCB6E)),
-      (AppStrings.categorySupplement, Icons.health_and_safety_rounded, const Color(0xFF74B9FF)),
-      (AppStrings.categoryPersonalCare, Icons.self_improvement_rounded, const Color(0xFFE17055)),
+    const categories = [
+      ProductCategory.medicine,
+      ProductCategory.cosmetics,
+      ProductCategory.skincare,
+      ProductCategory.babyProduct,
+      ProductCategory.supplement,
+      ProductCategory.personalCare,
     ];
 
     return Column(
@@ -173,10 +176,10 @@ class _HomeScreenState extends State<HomeScreen> {
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, i) {
               final cat = categories[i];
-              return CategoryChip(
-                label: cat.$1,
-                icon: cat.$2,
-                color: cat.$3,
+              return AppChip(
+                label: cat.label,
+                icon: cat.icon,
+                color: cat.color,
                 onTap: () => _pushScan(context),
               ).animate().fadeIn(delay: Duration(milliseconds: i * 60));
             },
@@ -234,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, i) {
               final item = _history[i];
-              return HistoryPreviewCard(
+              return ScanResultCard(
                 result: item,
                 onTap: () => context.push('/result/${item.id}'),
               ).animate().fadeIn(delay: Duration(milliseconds: i * 100));
@@ -247,13 +250,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildEmptyHistory() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
+      child: AppCard(
+        padding: const EdgeInsets.all(32),
+        child: Column(
         children: [
           Container(
             width: 72,
@@ -283,6 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ],
+        ),
       ),
     );
   }
@@ -290,48 +290,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFAB(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        width: double.infinity,
-        height: 58,
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _pushScan(context),
-            borderRadius: BorderRadius.circular(18),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.document_scanner_rounded,
-                    color: Colors.white, size: 22),
-                SizedBox(width: 10),
-                Text(
-                  AppStrings.scanButton,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      child: GradientButton(
+        label: AppStrings.scanButton,
+        icon: Icons.document_scanner_rounded,
+        onPressed: () => _pushScan(context),
       ),
-    )
-        .animate()
-        .fadeIn(delay: 400.ms, duration: 400.ms)
-        .slideY(begin: 0.3, end: 0, delay: 400.ms);
+    );
   }
 }

@@ -24,19 +24,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.document_scanner_rounded,
       title: AppStrings.onboarding1Title,
       description: AppStrings.onboarding1Desc,
-      color: Color(0xFF6C5CE7),
+      color: AppColors.primary,
     ),
     _OnboardingPage(
       icon: Icons.psychology_rounded,
       title: AppStrings.onboarding2Title,
       description: AppStrings.onboarding2Desc,
-      color: Color(0xFF00B894),
+      color: AppColors.accent,
     ),
     _OnboardingPage(
       icon: Icons.verified_rounded,
       title: AppStrings.onboarding3Title,
       description: AppStrings.onboarding3Desc,
-      color: Color(0xFFFF7675),
+      color: AppColors.safeGreen,
     ),
   ];
 

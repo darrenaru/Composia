@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/constants/category_style.dart';
 import '../../../models/ingredient.dart';
 
 class SafetyBadge extends StatelessWidget {
@@ -49,42 +50,26 @@ class SafetyBadge extends StatelessWidget {
   }
 
   _SafetyConfig _getConfig(SafetyLevel level) {
+    return _SafetyConfig(
+      label: _shortLabel(level),
+      color: level.color,
+      bgColor: level.lightColor,
+      icon: level.icon,
+    );
+  }
+
+  static String _shortLabel(SafetyLevel level) {
     switch (level) {
       case SafetyLevel.safe:
-        return const _SafetyConfig(
-          label: AppStrings.safeLabel,
-          color: AppColors.safeGreen,
-          bgColor: AppColors.safeGreenLight,
-          icon: Icons.check_circle_rounded,
-        );
+        return AppStrings.safeLabel;
       case SafetyLevel.caution:
-        return const _SafetyConfig(
-          label: AppStrings.cautionLabel,
-          color: AppColors.cautionYellow,
-          bgColor: AppColors.cautionYellowLight,
-          icon: Icons.info_rounded,
-        );
+        return AppStrings.cautionLabel;
       case SafetyLevel.warning:
-        return const _SafetyConfig(
-          label: AppStrings.warningLabel,
-          color: AppColors.warningOrange,
-          bgColor: AppColors.warningOrangeLight,
-          icon: Icons.warning_rounded,
-        );
+        return AppStrings.warningLabel;
       case SafetyLevel.danger:
-        return const _SafetyConfig(
-          label: AppStrings.dangerLabel,
-          color: AppColors.dangerRed,
-          bgColor: AppColors.dangerRedLight,
-          icon: Icons.dangerous_rounded,
-        );
+        return AppStrings.dangerLabel;
       case SafetyLevel.unknown:
-        return const _SafetyConfig(
-          label: AppStrings.unknownLabel,
-          color: AppColors.unknownGrey,
-          bgColor: AppColors.unknownGreyLight,
-          icon: Icons.help_rounded,
-        );
+        return AppStrings.unknownLabel;
     }
   }
 }
@@ -167,42 +152,26 @@ class OverallSafetyIndicator extends StatelessWidget {
   }
 
   _SafetyConfig _getConfig(SafetyLevel level) {
+    return _SafetyConfig(
+      label: _longLabel(level),
+      color: level.color,
+      bgColor: level.lightColor,
+      icon: level.icon,
+    );
+  }
+
+  static String _longLabel(SafetyLevel level) {
     switch (level) {
       case SafetyLevel.safe:
-        return const _SafetyConfig(
-          label: 'Produk Aman',
-          color: AppColors.safeGreen,
-          bgColor: AppColors.safeGreenLight,
-          icon: Icons.verified_rounded,
-        );
+        return 'Produk Aman';
       case SafetyLevel.caution:
-        return const _SafetyConfig(
-          label: 'Perlu Perhatian',
-          color: AppColors.cautionYellow,
-          bgColor: AppColors.cautionYellowLight,
-          icon: Icons.info_rounded,
-        );
+        return 'Perlu Perhatian';
       case SafetyLevel.warning:
-        return const _SafetyConfig(
-          label: 'Ada Peringatan',
-          color: AppColors.warningOrange,
-          bgColor: AppColors.warningOrangeLight,
-          icon: Icons.warning_rounded,
-        );
+        return 'Ada Peringatan';
       case SafetyLevel.danger:
-        return const _SafetyConfig(
-          label: 'Berbahaya',
-          color: AppColors.dangerRed,
-          bgColor: AppColors.dangerRedLight,
-          icon: Icons.dangerous_rounded,
-        );
+        return 'Berbahaya';
       case SafetyLevel.unknown:
-        return const _SafetyConfig(
-          label: 'Tidak Diketahui',
-          color: AppColors.unknownGrey,
-          bgColor: AppColors.unknownGreyLight,
-          icon: Icons.help_rounded,
-        );
+        return 'Tidak Diketahui';
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/category_style.dart';
 import '../../../models/ingredient.dart';
 import 'safety_badge.dart';
 
@@ -22,20 +23,7 @@ class IngredientCard extends StatefulWidget {
 class _IngredientCardState extends State<IngredientCard> {
   bool _expanded = false;
 
-  Color get _levelColor {
-    switch (widget.ingredient.safetyLevel) {
-      case SafetyLevel.safe:
-        return AppColors.safeGreen;
-      case SafetyLevel.caution:
-        return AppColors.cautionYellow;
-      case SafetyLevel.warning:
-        return AppColors.warningOrange;
-      case SafetyLevel.danger:
-        return AppColors.dangerRed;
-      case SafetyLevel.unknown:
-        return AppColors.unknownGrey;
-    }
-  }
+  Color get _levelColor => widget.ingredient.safetyLevel.color;
 
   @override
   Widget build(BuildContext context) {
