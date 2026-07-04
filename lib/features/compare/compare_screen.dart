@@ -49,7 +49,7 @@ class CompareScreen extends StatelessWidget {
 
     if (resultA == null || resultB == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Bandingkan Produk')),
+        appBar: const CustomAppBar(title: 'Bandingkan Produk'),
         body: const Center(child: Text('Salah satu hasil tidak ditemukan')),
       );
     }
@@ -79,7 +79,7 @@ class CompareScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ..._buildIngredientRows(resultA, resultB),
+          _buildIngredientRows(resultA, resultB),
         ],
       ),
     );
@@ -137,7 +137,7 @@ class CompareScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildIngredientRows(AnalysisResult a, AnalysisResult b) {
+  Widget _buildIngredientRows(AnalysisResult a, AnalysisResult b) {
     final mapA = <String, Ingredient>{
       for (final i in a.ingredients) i.name.toLowerCase().trim(): i,
     };
@@ -146,33 +146,42 @@ class CompareScreen extends StatelessWidget {
     };
     final keys = {...mapA.keys, ...mapB.keys}.toList()..sort();
 
-    return keys.map((key) {
-      final ingA = mapA[key];
-      final ingB = mapB[key];
-      final displayName = (ingA ?? ingB)!.name;
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: keys.asMap().entries.map((entry) {
+          final key = entry.value;
+          final ingA = mapA[key];
+          final ingB = mapB[key];
+          final displayName = (ingA ?? ingB)!.name;
+          final isLast = entry.key == keys.length - 1;
 
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: AppCard(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          radius: 12,
-          child: Row(
+          return Column(
             children: [
-              Expanded(
-                flex: 2,
-                child: Text(
-                  displayName,
-                  style:
-                      const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        displayName,
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.textPrimary),
+                      ),
+                    ),
+                    Expanded(child: _buildPresenceBadge(ingA)),
+                    Expanded(child: _buildPresenceBadge(ingB)),
+                  ],
                 ),
               ),
-              Expanded(child: _buildPresenceBadge(ingA)),
-              Expanded(child: _buildPresenceBadge(ingB)),
+              if (!isLast) const Divider(height: 1, color: AppColors.divider),
             ],
-          ),
-        ),
-      );
-    }).toList();
+          );
+        }).toList(),
+      ),
+    );
   }
 
   Widget _buildPresenceBadge(Ingredient? ingredient) {

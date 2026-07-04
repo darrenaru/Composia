@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
-import '../../core/widgets/custom_app_bar.dart';
 import '../../core/widgets/custom_button.dart';
 import '../../core/widgets/scan_result_card.dart';
+import '../../core/widgets/tab_header.dart';
 import '../../models/analysis_result.dart';
 import '../../services/storage_service.dart';
 
@@ -101,28 +101,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: AppStrings.historyTitle,
-        actions: [
-          if (_history.length >= 2)
-            IconButton(
-              onPressed: _toggleSelectionMode,
-              icon: Icon(_selectionMode
-                  ? Icons.close_rounded
-                  : Icons.compare_arrows_rounded),
-              tooltip: _selectionMode ? 'Batal' : 'Bandingkan',
+      body: SafeArea(
+        child: Column(
+          children: [
+            TabHeader(
+              title: AppStrings.historyTitle,
+              actions: [
+                if (_history.length >= 2)
+                  IconButton(
+                    onPressed: _toggleSelectionMode,
+                    icon: Icon(_selectionMode
+                        ? Icons.close_rounded
+                        : Icons.compare_arrows_rounded),
+                    tooltip: _selectionMode ? 'Batal' : 'Bandingkan',
+                  ),
+                if (!_selectionMode && _history.isNotEmpty)
+                  TextButton(
+                    onPressed: _confirmClearAll,
+                    child: const Text(
+                      AppStrings.clearAll,
+                      style: TextStyle(color: AppColors.dangerRed),
+                    ),
+                  ),
+              ],
             ),
-          if (!_selectionMode && _history.isNotEmpty)
-            TextButton(
-              onPressed: _confirmClearAll,
-              child: const Text(
-                AppStrings.clearAll,
-                style: TextStyle(color: AppColors.dangerRed),
-              ),
-            ),
-        ],
+            Expanded(child: _history.isEmpty ? _buildEmpty() : _buildList()),
+          ],
+        ),
       ),
-      body: _history.isEmpty ? _buildEmpty() : _buildList(),
       bottomNavigationBar: _selectionMode && _selectedIds.length == 2
           ? SafeArea(
               child: Padding(

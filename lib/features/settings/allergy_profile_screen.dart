@@ -92,6 +92,15 @@ class _AllergyProfileScreenState extends State<AllergyProfileScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          const Text(
+            'Alergen Umum',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,

@@ -15,6 +15,11 @@ class AppStrings {
   static const String onboarding3Desc =
       'Dapatkan penjelasan sederhana, rating keamanan, dan rekomendasi yang personal.';
 
+  // Bottom nav
+  static const String navHomeLabel = 'Home';
+  static const String navHistoryLabel = 'Riwayat';
+  static const String navSettingsLabel = 'Pengaturan';
+
   // Home
   static const String homeGreeting = 'Halo!';
   static const String homeSubGreeting = 'Produk apa yang ingin kamu periksa?';

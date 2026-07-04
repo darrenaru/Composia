@@ -8,6 +8,7 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/custom_button.dart';
 import '../../core/widgets/scan_result_card.dart';
+import '../../core/widgets/tab_header.dart';
 import '../../models/analysis_result.dart';
 import '../../services/storage_service.dart';
 import 'widgets/tip_card.dart';
@@ -58,87 +59,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(context),
-          SliverToBoxAdapter(child: _buildBody(context)),
-        ],
-      ),
-      floatingActionButton: _buildFAB(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 200,
-      pinned: true,
-      backgroundColor: AppColors.primary,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
-          padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
-          child: Stack(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 60),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _greeting,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withOpacity(0.85),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ).animate().fadeIn(duration: 400.ms),
-                      const SizedBox(height: 4),
-                      const Text(
-                        AppStrings.homeSubGreeting,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconButton(
-                  onPressed: () => context.push('/settings'),
-                  icon: const Icon(Icons.settings_rounded, color: Colors.white),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.15),
-                  ),
-                ),
-              ),
+              TabHeader(eyebrow: _greeting, title: AppStrings.homeSubGreeting),
+              _buildHistory(context),
+              const SizedBox(height: 24),
+              _buildTips(),
+              const SizedBox(height: 24),
+              _buildCategories(),
+              const SizedBox(height: 100),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 20),
-        _buildCategories(),
-        const SizedBox(height: 24),
-        _buildTips(),
-        const SizedBox(height: 24),
-        _buildHistory(context),
-        const SizedBox(height: 100),
-      ],
+      floatingActionButton: _buildFAB(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -218,8 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               if (_history.isNotEmpty)
                 TextButton(
-                  onPressed: () =>
-                      context.push('/history').then((_) => _loadHistory()),
+                  onPressed: () => context.go('/history'),
                   child: const Text('Lihat Semua'),
                 ),
             ],
@@ -253,35 +190,35 @@ class _HomeScreenState extends State<HomeScreen> {
       child: AppCard(
         padding: const EdgeInsets.all(32),
         child: Column(
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(20),
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.image_search_rounded,
+                size: 36,
+                color: AppColors.primary,
+              ),
             ),
-            child: const Icon(
-              Icons.image_search_rounded,
-              size: 36,
-              color: AppColors.primary,
+            const SizedBox(height: 16),
+            const Text(
+              AppStrings.noHistory,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            AppStrings.noHistory,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+            const SizedBox(height: 6),
+            const Text(
+              AppStrings.noHistoryDesc,
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            AppStrings.noHistoryDesc,
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-        ],
+          ],
         ),
       ),
     );

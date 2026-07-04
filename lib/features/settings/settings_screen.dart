@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/widgets/app_card.dart';
-import '../../core/widgets/custom_app_bar.dart';
+import '../../core/widgets/tab_header.dart';
 import '../../services/storage_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -31,23 +31,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(title: AppStrings.settingsTitle),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildAllergyProfileCard(context)
-                .animate()
-                .fadeIn(duration: 400.ms),
-            const SizedBox(height: 24),
-            _buildAboutSection().animate().fadeIn(duration: 400.ms),
-            const SizedBox(height: 24),
-            _buildDangerZone()
-                .animate()
-                .fadeIn(delay: 250.ms, duration: 400.ms),
-            const SizedBox(height: 40),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TabHeader(title: AppStrings.settingsTitle),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildAllergyProfileCard(context)
+                        .animate()
+                        .fadeIn(duration: 400.ms),
+                    const SizedBox(height: 24),
+                    _buildAboutSection().animate().fadeIn(duration: 400.ms),
+                    const SizedBox(height: 24),
+                    _buildDangerZone()
+                        .animate()
+                        .fadeIn(delay: 250.ms, duration: 400.ms),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

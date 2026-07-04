@@ -141,19 +141,6 @@ class _ResultScreenState extends State<ResultScreen>
             _buildAllergyBanner(),
             const SizedBox(height: 16),
           ],
-          if (result.overallSafetyNote.isNotEmpty) ...[
-            _buildSection(
-              child: Text(
-                result.overallSafetyNote,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                  height: 1.6,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
           _buildSection(
             child: ProductSummaryCard(result: result),
           ).animate().fadeIn(delay: 150.ms),
@@ -165,14 +152,10 @@ class _ResultScreenState extends State<ResultScreen>
 
   Widget _buildAllergyBanner() {
     final names = _matchedAllergyIngredients.map((i) => i.name).join(', ');
-    return Container(
-      width: double.infinity,
+    return AppCard(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.dangerRedLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.dangerRed.withOpacity(0.3)),
-      ),
+      backgroundColor: AppColors.dangerRedLight,
+      borderColor: AppColors.dangerRed.withOpacity(0.3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

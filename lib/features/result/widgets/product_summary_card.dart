@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/category_style.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../models/analysis_result.dart';
 
 class ProductSummaryCard extends StatelessWidget {
@@ -17,6 +18,10 @@ class ProductSummaryCard extends StatelessWidget {
         _buildProductInfo(),
         const SizedBox(height: 16),
         _buildSummaryText(),
+        if (result.overallSafetyNote.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _buildSafetyNote(),
+        ],
         const SizedBox(height: 16),
         _buildIngredientStats(),
         if (result.allergens.isNotEmpty) ...[
@@ -84,14 +89,50 @@ class ProductSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIngredientStats() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+  Widget _buildSafetyNote() {
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      backgroundColor: AppColors.background,
+      radius: 14,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.shield_rounded,
+              color: AppColors.textSecondary, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Catatan Keamanan',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  result.overallSafetyNote,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildIngredientStats() {
+    return AppCard(
+      padding: const EdgeInsets.all(16),
+      backgroundColor: AppColors.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -208,13 +249,11 @@ class ProductSummaryCard extends StatelessWidget {
   }
 
   Widget _buildAllergenWarning() {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.warningOrangeLight,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.warningOrange.withOpacity(0.3)),
-      ),
+      radius: 14,
+      backgroundColor: AppColors.warningOrangeLight,
+      borderColor: AppColors.warningOrange.withOpacity(0.3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -250,13 +289,11 @@ class ProductSummaryCard extends StatelessWidget {
   }
 
   Widget _buildRecommendation() {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primary.withOpacity(0.15)),
-      ),
+      radius: 14,
+      backgroundColor: AppColors.primary.withOpacity(0.05),
+      borderColor: AppColors.primary.withOpacity(0.15),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

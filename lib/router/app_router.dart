@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../core/widgets/main_shell.dart';
 import '../features/compare/compare_screen.dart';
 import '../features/history/history_screen.dart';
 import '../features/home/home_screen.dart';
@@ -33,10 +34,32 @@ class AppRouter {
         builder: (context, state) =>
             OnboardingScreen(storageService: storageService),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) =>
-            HomeScreen(storageService: storageService),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            MainShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) =>
+                  HomeScreen(storageService: storageService),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/history',
+              builder: (context, state) =>
+                  HistoryScreen(storageService: storageService),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) =>
+                  SettingsScreen(storageService: storageService),
+            ),
+          ]),
+        ],
       ),
       GoRoute(
         path: '/scan',
@@ -58,16 +81,6 @@ class AppRouter {
           resultId: state.pathParameters['id']!,
           storageService: storageService,
         ),
-      ),
-      GoRoute(
-        path: '/history',
-        builder: (context, state) =>
-            HistoryScreen(storageService: storageService),
-      ),
-      GoRoute(
-        path: '/settings',
-        builder: (context, state) =>
-            SettingsScreen(storageService: storageService),
       ),
       GoRoute(
         path: '/allergy-profile',

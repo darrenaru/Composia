@@ -213,7 +213,7 @@ class ScanScreen extends StatelessWidget {
             ? SnackBarAction(
                 label: 'Pengaturan',
                 textColor: Colors.white,
-                onPressed: () => context.push('/settings'),
+                onPressed: () => context.go('/settings'),
               )
             : null,
         duration: const Duration(seconds: 5),
