@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'chat_message.dart';
 import 'ingredient.dart';
 
 enum ProductCategory {
@@ -22,6 +23,7 @@ class AnalysisResult {
   final DateTime analyzedAt;
   final String? imagePath;
   final String? recommendation;
+  final List<ChatMessage> chatMessages;
 
   const AnalysisResult({
     required this.id,
@@ -34,7 +36,24 @@ class AnalysisResult {
     required this.analyzedAt,
     this.imagePath,
     this.recommendation,
+    this.chatMessages = const [],
   });
+
+  AnalysisResult copyWith({List<ChatMessage>? chatMessages}) {
+    return AnalysisResult(
+      id: id,
+      productName: productName,
+      category: category,
+      summary: summary,
+      overallSafetyNote: overallSafetyNote,
+      overallSafetyLevel: overallSafetyLevel,
+      ingredients: ingredients,
+      analyzedAt: analyzedAt,
+      imagePath: imagePath,
+      recommendation: recommendation,
+      chatMessages: chatMessages ?? this.chatMessages,
+    );
+  }
 
   int get safeCount =>
       ingredients.where((i) => i.safetyLevel == SafetyLevel.safe).length;
@@ -65,6 +84,9 @@ class AnalysisResult {
       analyzedAt: DateTime.parse(json['analyzed_at'] as String),
       imagePath: json['image_path'] as String?,
       recommendation: json['recommendation'] as String?,
+      chatMessages: (json['chat_messages'] as List<dynamic>? ?? [])
+          .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -79,6 +101,7 @@ class AnalysisResult {
         'analyzed_at': analyzedAt.toIso8601String(),
         'image_path': imagePath,
         'recommendation': recommendation,
+        'chat_messages': chatMessages.map((m) => m.toJson()).toList(),
       };
 
   String toJsonString() => jsonEncode(toJson());
