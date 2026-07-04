@@ -16,61 +16,59 @@ class RecognizeBloc extends Bloc<RecognizeEvent, RecognizeState> {
     ProductLookupService? lookupService,
   })  : _lookupService = lookupService ?? ProductLookupService(),
         super(const RecognizeInitial()) {
-    on<BarcodeDetected>(_onBarcodeDetected);
-    on<PackagingPhotoCaptured>(_onPackagingPhotoCaptured);
+    on<PhotoTaken>(_onPhotoTaken);
   }
 
-  Future<void> _onBarcodeDetected(
-      BarcodeDetected event, Emitter<RecognizeState> emit) async {
-    emit(const RecognizeLookingUp());
-
-    ProductLookupResult? lookup;
-    try {
-      lookup = await _lookupService.lookupByBarcode(event.code);
-    } on ProductLookupException catch (e) {
-      emit(RecognizeError(e.message));
-      return;
-    }
-
-    if (lookup == null) {
-      emit(const RecognizeNotFound());
-      return;
-    }
-
-    await _analyzeAndEmit(
-      emit,
-      ingredientsText: lookup.ingredientsText,
-      productNameHint: lookup.productName,
-    );
-  }
-
-  Future<void> _onPackagingPhotoCaptured(
-      PackagingPhotoCaptured event, Emitter<RecognizeState> emit) async {
-    emit(RecognizeIdentifying(event.image));
+  Future<void> _onPhotoTaken(
+      PhotoTaken event, Emitter<RecognizeState> emit) async {
+    emit(const RecognizeAnalyzingPhoto());
     final geminiService = GeminiService(apiKey: storageService.getApiKey());
 
-    PackagingIdentification identification;
+    PhotoAnalysisResult photoResult;
     try {
-      identification =
-          await geminiService.identifyPackaging(imageFile: event.image);
+      photoResult = await geminiService.analyzePhoto(
+        imageFile: event.image,
+        resultId: _uuid.v4(),
+      );
     } on GeminiException catch (e) {
       emit(RecognizeError(_friendlyGeminiError(e)));
       return;
     }
 
-    final name = identification.productName;
-    if (identification.confidence == 'low' ||
-        name == null ||
-        name.trim().isEmpty) {
-      emit(const RecognizeNotFound());
+    if (photoResult is DirectAnalysisResult) {
+      await storageService.saveToHistory(photoResult.result);
+      emit(RecognizeSuccess(photoResult.result));
       return;
     }
 
-    emit(RecognizeSearchingComposition(name));
-    final compositionText = await geminiService.searchCompositionByWeb(
-      productName: name,
-      brand: identification.brand,
-    );
+    final needsLookup = photoResult as NeedsLookupResult;
+
+    ProductLookupResult? lookup;
+    final barcodeDigits = needsLookup.barcodeDigits;
+    if (barcodeDigits != null && barcodeDigits.trim().isNotEmpty) {
+      try {
+        lookup = await _lookupService.lookupByBarcode(barcodeDigits.trim());
+      } on ProductLookupException {
+        lookup = null;
+      }
+    }
+
+    String? compositionText;
+    String? productNameHint;
+
+    if (lookup != null) {
+      compositionText = lookup.ingredientsText;
+      productNameHint = lookup.productName ?? needsLookup.productName;
+    } else if (needsLookup.confidence != 'low' &&
+        needsLookup.productName != null &&
+        needsLookup.productName!.trim().isNotEmpty) {
+      emit(RecognizeSearchingComposition(needsLookup.productName!));
+      compositionText = await geminiService.searchCompositionByWeb(
+        productName: needsLookup.productName!,
+        brand: needsLookup.brand,
+      );
+      productNameHint = needsLookup.productName;
+    }
 
     if (compositionText == null || compositionText.trim().isEmpty) {
       emit(const RecognizeNotFound());
@@ -80,7 +78,7 @@ class RecognizeBloc extends Bloc<RecognizeEvent, RecognizeState> {
     await _analyzeAndEmit(
       emit,
       ingredientsText: compositionText,
-      productNameHint: name,
+      productNameHint: productNameHint,
     );
   }
 

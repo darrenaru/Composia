@@ -1,4 +1,3 @@
-import 'dart:io';
 import '../../../models/analysis_result.dart';
 
 abstract class RecognizeState {
@@ -9,13 +8,8 @@ class RecognizeInitial extends RecognizeState {
   const RecognizeInitial();
 }
 
-class RecognizeLookingUp extends RecognizeState {
-  const RecognizeLookingUp();
-}
-
-class RecognizeIdentifying extends RecognizeState {
-  final File image;
-  const RecognizeIdentifying(this.image);
+class RecognizeAnalyzingPhoto extends RecognizeState {
+  const RecognizeAnalyzingPhoto();
 }
 
 class RecognizeSearchingComposition extends RecognizeState {
