@@ -38,20 +38,28 @@ class MainShell extends StatelessWidget {
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(_items.length, (i) {
-              final (icon, label) = _items[i];
-              return _NavItem(
-                icon: icon,
-                label: label,
-                selected: navigationShell.currentIndex == i,
-                onTap: () => navigationShell.goBranch(
-                  i,
-                  initialLocation: i == navigationShell.currentIndex,
-                ),
-              );
-            }),
+            children: [
+              _navItemFor(0),
+              _navItemFor(1),
+              _ScanCenterButton(onTap: () => context.push('/recognize')),
+              _navItemFor(2),
+              _navItemFor(3),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _navItemFor(int i) {
+    final (icon, label) = _items[i];
+    return _NavItem(
+      icon: icon,
+      label: label,
+      selected: navigationShell.currentIndex == i,
+      onTap: () => navigationShell.goBranch(
+        i,
+        initialLocation: i == navigationShell.currentIndex,
       ),
     );
   }
@@ -77,21 +85,58 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.pill),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 23),
+            Icon(icon, color: color, size: 22),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 color: color,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: 11,
+                fontSize: 10,
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScanCenterButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ScanCenterButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.translate(
+      offset: const Offset(0, -16),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: 54,
+          height: 54,
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.4),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.document_scanner_rounded,
+            color: Colors.white,
+            size: 26,
+          ),
         ),
       ),
     );

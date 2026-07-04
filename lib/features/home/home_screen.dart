@@ -6,7 +6,6 @@ import '../../core/constants/app_strings.dart';
 import '../../core/constants/category_style.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_chip.dart';
-import '../../core/widgets/custom_button.dart';
 import '../../core/widgets/scan_result_card.dart';
 import '../../core/widgets/tab_header.dart';
 import '../../models/analysis_result.dart';
@@ -77,13 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildTips(),
               const SizedBox(height: 24),
               _buildCategories(),
-              const SizedBox(height: 100),
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ),
-      floatingActionButton: _buildFAB(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -227,17 +224,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFAB(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: GradientButton(
-        label: AppStrings.scanButton,
-        icon: Icons.document_scanner_rounded,
-        onPressed: () => _pushScan(context),
       ),
     );
   }
