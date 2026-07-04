@@ -13,6 +13,8 @@ import '../features/recognize/recognize_screen.dart';
 import '../features/result/result_screen.dart';
 import '../features/scan/bloc/scan_bloc.dart';
 import '../features/scan/scan_screen.dart';
+import '../features/search/bloc/search_bloc.dart';
+import '../features/search/search_screen.dart';
 import '../features/settings/allergy_profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
@@ -45,6 +47,15 @@ class AppRouter {
               path: '/home',
               builder: (context, state) =>
                   HomeScreen(storageService: storageService),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/search',
+              builder: (context, state) => BlocProvider(
+                create: (_) => SearchBloc(storageService: storageService),
+                child: const SearchScreen(),
+              ),
             ),
           ]),
           StatefulShellBranch(routes: [

@@ -11,6 +11,7 @@ class MainShell extends StatelessWidget {
 
   static const _items = [
     (Icons.home_rounded, AppStrings.navHomeLabel),
+    (Icons.search_rounded, AppStrings.navSearchLabel),
     (Icons.history_rounded, AppStrings.navHistoryLabel),
     (Icons.settings_rounded, AppStrings.navSettingsLabel),
   ];

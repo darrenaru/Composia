@@ -17,6 +17,7 @@ class AppStrings {
 
   // Bottom nav
   static const String navHomeLabel = 'Home';
+  static const String navSearchLabel = 'Cari';
   static const String navHistoryLabel = 'Riwayat';
   static const String navSettingsLabel = 'Pengaturan';
 
