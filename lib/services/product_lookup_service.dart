@@ -39,6 +39,42 @@ class ProductLookupService {
     );
   }
 
+  Future<List<ProductLookupResult>> searchByName(String query) async {
+    final fromBeautyFacts = await _trySearch(
+      'https://world.openbeautyfacts.org/cgi/search.pl'
+      '?search_terms=${Uri.encodeComponent(query)}&search_simple=1&action=process&json=1&page_size=10',
+    );
+    if (fromBeautyFacts.isNotEmpty) return fromBeautyFacts;
+
+    return _trySearch(
+      'https://world.openfoodfacts.org/cgi/search.pl'
+      '?search_terms=${Uri.encodeComponent(query)}&search_simple=1&action=process&json=1&page_size=10',
+    );
+  }
+
+  Future<List<ProductLookupResult>> _trySearch(String url) async {
+    final response = await _client.get(Uri.parse(url));
+
+    if (response.statusCode != 200) {
+      throw ProductLookupException(
+          'Gagal menghubungi server (${response.statusCode})');
+    }
+
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    final products = json['products'] as List<dynamic>? ?? [];
+
+    return products
+        .map((p) => p as Map<String, dynamic>)
+        .where((p) =>
+            (p['ingredients_text'] as String?)?.trim().isNotEmpty ?? false)
+        .map((p) => ProductLookupResult(
+              productName: p['product_name'] as String?,
+              brand: p['brands'] as String?,
+              ingredientsText: p['ingredients_text'] as String,
+            ))
+        .toList();
+  }
+
   Future<ProductLookupResult?> _tryFetch(String url) async {
     final response = await _client.get(Uri.parse(url));
 

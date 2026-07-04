@@ -77,4 +77,78 @@ void main() {
       throwsA(isA<ProductLookupException>()),
     );
   });
+
+  test('searchByName returns results from Open Beauty Facts', () async {
+    final client = MockClient((request) async {
+      if (request.url.host == 'world.openbeautyfacts.org') {
+        return http.Response(
+          '{"products":[{"product_name":"Sunscreen A","brands":"Merek A","ingredients_text":"Aqua, Zinc Oxide"}]}',
+          200,
+        );
+      }
+      return http.Response('{"products":[]}', 200);
+    });
+    final service = ProductLookupService(client: client);
+
+    final results = await service.searchByName('sunscreen');
+
+    expect(results.length, 1);
+    expect(results.first.productName, 'Sunscreen A');
+    expect(results.first.ingredientsText, 'Aqua, Zinc Oxide');
+  });
+
+  test('searchByName falls back to Open Food Facts when OBF has no results', () async {
+    final client = MockClient((request) async {
+      if (request.url.host == 'world.openbeautyfacts.org') {
+        return http.Response('{"products":[]}', 200);
+      }
+      return http.Response(
+        '{"products":[{"product_name":"Keripik Z","brands":"Merek W","ingredients_text":"Kentang, Garam"}]}',
+        200,
+      );
+    });
+    final service = ProductLookupService(client: client);
+
+    final results = await service.searchByName('keripik');
+
+    expect(results.length, 1);
+    expect(results.first.productName, 'Keripik Z');
+  });
+
+  test('searchByName returns empty list when not found in either database', () async {
+    final client = MockClient((request) async => http.Response('{"products":[]}', 200));
+    final service = ProductLookupService(client: client);
+
+    final results = await service.searchByName('tidak ada');
+
+    expect(results, isEmpty);
+  });
+
+  test('searchByName skips products without ingredients_text', () async {
+    final client = MockClient((request) async {
+      if (request.url.host == 'world.openbeautyfacts.org') {
+        return http.Response(
+          '{"products":[{"product_name":"Tanpa Komposisi"},{"product_name":"Ada Komposisi","ingredients_text":"Aqua"}]}',
+          200,
+        );
+      }
+      return http.Response('{"products":[]}', 200);
+    });
+    final service = ProductLookupService(client: client);
+
+    final results = await service.searchByName('produk');
+
+    expect(results.length, 1);
+    expect(results.first.productName, 'Ada Komposisi');
+  });
+
+  test('searchByName throws ProductLookupException on server error', () async {
+    final client = MockClient((request) async => http.Response('Server Error', 500));
+    final service = ProductLookupService(client: client);
+
+    expect(
+      () => service.searchByName('apapun'),
+      throwsA(isA<ProductLookupException>()),
+    );
+  });
 }
