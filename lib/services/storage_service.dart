@@ -24,6 +24,21 @@ class StorageService {
   // API Key — ditanam langsung, tidak ada UI untuk isi/ubah manual.
   String getApiKey() => _defaultApiKey;
 
+  static const String _allergyProfileKey = 'composia_allergy_profile';
+
+  // Allergy Profile
+  List<String> getAllergyProfile() =>
+      _prefs.getStringList(_allergyProfileKey) ?? [];
+
+  Future<void> setAllergyProfile(List<String> terms) {
+    final cleaned = terms
+        .map((t) => t.trim().toLowerCase())
+        .where((t) => t.isNotEmpty)
+        .toSet()
+        .toList();
+    return _prefs.setStringList(_allergyProfileKey, cleaned);
+  }
+
   // Onboarding
   bool get isOnboardingDone => _prefs.getBool(_onboardingKey) ?? false;
 
