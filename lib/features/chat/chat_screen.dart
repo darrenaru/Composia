@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/custom_app_bar.dart';
@@ -163,20 +164,46 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildTypingIndicator() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: AppColors.primary,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(3, (i) => _buildTypingDot(i)),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildTypingDot(int index) {
+    return Container(
+      width: 7,
+      height: 7,
+      margin: EdgeInsets.only(left: index == 0 ? 0 : 5),
+      decoration: const BoxDecoration(
+        color: AppColors.textHint,
+        shape: BoxShape.circle,
+      ),
+    )
+        .animate(onPlay: (controller) => controller.repeat())
+        .scaleXY(
+          begin: 0.6,
+          end: 1.0,
+          duration: 400.ms,
+          delay: (index * 150).ms,
+          curve: Curves.easeInOut,
+        )
+        .then()
+        .scaleXY(begin: 1.0, end: 0.6, duration: 400.ms);
   }
 
   Widget _buildErrorBanner(BuildContext context, String message) {
