@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../features/compare/compare_screen.dart';
 import '../features/history/history_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -63,6 +64,14 @@ class AppRouter {
         path: '/allergy-profile',
         builder: (context, state) =>
             AllergyProfileScreen(storageService: storageService),
+      ),
+      GoRoute(
+        path: '/compare/:idA/:idB',
+        builder: (context, state) => CompareScreen(
+          idA: state.pathParameters['idA']!,
+          idB: state.pathParameters['idB']!,
+          storageService: storageService,
+        ),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -1,0 +1,208 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/constants/app_colors.dart';
+import '../../models/analysis_result.dart';
+import '../../models/ingredient.dart';
+import '../../services/storage_service.dart';
+import '../result/widgets/safety_badge.dart';
+
+double _severityWeight(SafetyLevel level) {
+  switch (level) {
+    case SafetyLevel.safe:
+      return 0;
+    case SafetyLevel.caution:
+      return 1;
+    case SafetyLevel.warning:
+      return 2;
+    case SafetyLevel.danger:
+      return 3;
+    case SafetyLevel.unknown:
+      return 1;
+  }
+}
+
+double _averageSeverity(AnalysisResult result) {
+  if (result.ingredients.isEmpty) return 0;
+  final total = result.ingredients
+      .map((i) => _severityWeight(i.safetyLevel))
+      .reduce((a, b) => a + b);
+  return total / result.ingredients.length;
+}
+
+class CompareScreen extends StatelessWidget {
+  final String idA;
+  final String idB;
+  final StorageService storageService;
+
+  const CompareScreen({
+    super.key,
+    required this.idA,
+    required this.idB,
+    required this.storageService,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final resultA = storageService.getResultById(idA);
+    final resultB = storageService.getResultById(idB);
+
+    if (resultA == null || resultB == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Bandingkan Produk')),
+        body: const Center(child: Text('Salah satu hasil tidak ditemukan')),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('Bandingkan Produk'),
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildHeaderColumn(resultA)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildHeaderColumn(resultB)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildVerdict(resultA, resultB),
+          const SizedBox(height: 24),
+          const Text(
+            'Perbandingan Bahan',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ..._buildIngredientRows(resultA, resultB),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderColumn(AnalysisResult result) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            result.productName ?? 'Produk Tanpa Nama',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          SafetyBadge(level: result.overallSafetyLevel, compact: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerdict(AnalysisResult a, AnalysisResult b) {
+    final scoreA = _averageSeverity(a);
+    final scoreB = _averageSeverity(b);
+    final diff = (scoreA - scoreB).abs();
+
+    String text;
+    if (diff <= 0.3) {
+      text = 'Kira-kira setara dari sisi keamanan bahan.';
+    } else if (scoreA < scoreB) {
+      text = '${a.productName ?? "Produk A"} kira-kira lebih aman.';
+    } else {
+      text = '${b.productName ?? "Produk B"} kira-kira lebih aman.';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          color: AppColors.textPrimary,
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildIngredientRows(AnalysisResult a, AnalysisResult b) {
+    final mapA = <String, Ingredient>{
+      for (final i in a.ingredients) i.name.toLowerCase().trim(): i,
+    };
+    final mapB = <String, Ingredient>{
+      for (final i in b.ingredients) i.name.toLowerCase().trim(): i,
+    };
+    final keys = {...mapA.keys, ...mapB.keys}.toList()..sort();
+
+    return keys.map((key) {
+      final ingA = mapA[key];
+      final ingB = mapB[key];
+      final displayName = (ingA ?? ingB)!.name;
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  displayName,
+                  style:
+                      const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                ),
+              ),
+              Expanded(child: _buildPresenceBadge(ingA)),
+              Expanded(child: _buildPresenceBadge(ingB)),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  Widget _buildPresenceBadge(Ingredient? ingredient) {
+    if (ingredient == null) {
+      return const Center(
+        child: Text('-', style: TextStyle(color: AppColors.textHint)),
+      );
+    }
+    return Center(
+      child:
+          SafetyBadge(level: ingredient.safetyLevel, compact: true, showIcon: false),
+    );
+  }
+}
