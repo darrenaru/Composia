@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/custom_app_bar.dart';
 import '../../core/widgets/loading_overlay.dart';
 import '../scan/widgets/source_option_card.dart';
 import 'bloc/recognize_bloc.dart';
@@ -35,15 +37,7 @@ class RecognizeScreen extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: const Text('Kenali Produk'),
-          leading: IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          ),
-        ),
+        appBar: const CustomAppBar(title: 'Kenali Produk'),
         body: BlocBuilder<RecognizeBloc, RecognizeState>(
           builder: (context, state) {
             return Stack(
@@ -99,13 +93,9 @@ class RecognizeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(16),
-            ),
+          AppCard(
+            backgroundColor: AppColors.primary.withOpacity(0.06),
+            borderColor: Colors.transparent,
             child: const Text(
               'Foto label komposisi ATAU foto kemasan produk saja — sistem akan otomatis mengenali mana yang kamu foto dan mencari data komposisinya.',
               style: TextStyle(
@@ -116,30 +106,7 @@ class RecognizeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Pilih Sumber Foto',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SourceOptionCard(
-            icon: Icons.camera_alt_rounded,
-            title: 'Ambil Foto',
-            subtitle: 'Ambil foto langsung menggunakan kamera',
-            color: AppColors.primary,
-            onTap: () => _pickPhoto(context, ImageSource.camera),
-          ),
-          const SizedBox(height: 12),
-          SourceOptionCard(
-            icon: Icons.photo_library_rounded,
-            title: 'Pilih dari Galeri',
-            subtitle: 'Pilih foto dari galeri perangkat kamu',
-            color: AppColors.accent,
-            onTap: () => _pickPhoto(context, ImageSource.gallery),
-          ),
+          ..._buildSourceOptions(context),
         ],
       ),
     );
@@ -164,32 +131,38 @@ class RecognizeScreen extends StatelessWidget {
             style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 28),
-          const Text(
-            'Pilih Sumber Foto',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SourceOptionCard(
-            icon: Icons.camera_alt_rounded,
-            title: 'Ambil Foto',
-            subtitle: 'Ambil foto langsung menggunakan kamera',
-            color: AppColors.primary,
-            onTap: () => _pickPhoto(context, ImageSource.camera),
-          ),
-          const SizedBox(height: 12),
-          SourceOptionCard(
-            icon: Icons.photo_library_rounded,
-            title: 'Pilih dari Galeri',
-            subtitle: 'Pilih foto dari galeri perangkat kamu',
-            color: AppColors.accent,
-            onTap: () => _pickPhoto(context, ImageSource.gallery),
-          ),
+          ..._buildSourceOptions(context),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildSourceOptions(BuildContext context) {
+    return [
+      const Text(
+        'Pilih Sumber Foto',
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      const SizedBox(height: 16),
+      SourceOptionCard(
+        icon: Icons.camera_alt_rounded,
+        title: 'Ambil Foto',
+        subtitle: 'Ambil foto langsung menggunakan kamera',
+        color: AppColors.primary,
+        onTap: () => _pickPhoto(context, ImageSource.camera),
+      ),
+      const SizedBox(height: 12),
+      SourceOptionCard(
+        icon: Icons.photo_library_rounded,
+        title: 'Pilih dari Galeri',
+        subtitle: 'Pilih foto dari galeri perangkat kamu',
+        color: AppColors.accent,
+        onTap: () => _pickPhoto(context, ImageSource.gallery),
+      ),
+    ];
   }
 }
