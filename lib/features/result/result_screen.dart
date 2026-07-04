@@ -7,6 +7,7 @@ import '../../core/utils/allergy_matcher.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/custom_app_bar.dart';
+import '../../core/widgets/custom_button.dart';
 import '../../models/analysis_result.dart';
 import '../../models/ingredient.dart';
 import '../../services/storage_service.dart';
@@ -144,6 +145,15 @@ class _ResultScreenState extends State<ResultScreen>
           _buildSection(
             child: ProductSummaryCard(result: result),
           ).animate().fadeIn(delay: 150.ms),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlineIconButton(
+              label: 'Tanya AI',
+              icon: Icons.chat_bubble_outline_rounded,
+              onPressed: () => context.push('/result/${result.id}/chat'),
+            ),
+          ),
           const SizedBox(height: 80),
         ],
       ),

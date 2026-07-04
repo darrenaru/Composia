@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../core/widgets/main_shell.dart';
+import '../features/chat/bloc/chat_bloc.dart';
+import '../features/chat/chat_screen.dart';
 import '../features/compare/compare_screen.dart';
 import '../features/history/history_screen.dart';
 import '../features/home/home_screen.dart';
@@ -81,6 +83,25 @@ class AppRouter {
           resultId: state.pathParameters['id']!,
           storageService: storageService,
         ),
+      ),
+      GoRoute(
+        path: '/result/:id/chat',
+        builder: (context, state) {
+          final result =
+              storageService.getResultById(state.pathParameters['id']!);
+          if (result == null) {
+            return const Scaffold(
+              body: Center(child: Text('Hasil tidak ditemukan')),
+            );
+          }
+          return BlocProvider(
+            create: (_) => ChatBloc(
+              storageService: storageService,
+              result: result,
+            ),
+            child: ChatScreen(result: result),
+          );
+        },
       ),
       GoRoute(
         path: '/allergy-profile',
