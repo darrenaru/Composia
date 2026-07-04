@@ -5,6 +5,22 @@ import '../models/analysis_result.dart';
 import '../models/ingredient.dart';
 import '../core/utils/image_utils.dart';
 
+bool isCompositionNotFound(String text) => text.trim() == 'TIDAK_DITEMUKAN';
+
+class PackagingIdentification {
+  final String? productName;
+  final String? brand;
+  final ProductCategory category;
+  final String confidence;
+
+  const PackagingIdentification({
+    required this.productName,
+    required this.brand,
+    required this.category,
+    required this.confidence,
+  });
+}
+
 class GeminiService {
   static const String _model = 'gemini-2.5-flash';
   static const String _baseUrl =
@@ -67,6 +83,173 @@ class GeminiService {
     return _parseResponse(text, resultId, imageFile.path);
   }
 
+  Future<AnalysisResult> analyzeIngredientsFromText({
+    required String ingredientsText,
+    required String resultId,
+    String? productNameHint,
+  }) async {
+    final hintLine = productNameHint != null && productNameHint.isNotEmpty
+        ? 'Product name (extra context, may help but verify against the text below): $productNameHint\n\n'
+        : '';
+    final fullPrompt =
+        '$hintLine${_buildAnalysisPrompt()}\n\nHere is the raw ingredients list text to analyze (not an image):\n$ingredientsText';
+
+    final requestBody = {
+      'contents': [
+        {
+          'parts': [
+            {'text': fullPrompt},
+          ],
+        },
+      ],
+      'generationConfig': {
+        'responseMimeType': 'application/json',
+      },
+    };
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl?key=$apiKey'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      final errorMsg =
+          (errorBody['error'] as Map<String, dynamic>?)?['message']
+                  as String? ??
+              'API Error ${response.statusCode}';
+      throw GeminiException(errorMsg, response.statusCode);
+    }
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+    final candidates = responseData['candidates'] as List<dynamic>;
+    final parts =
+        (candidates.first as Map<String, dynamic>)['content']['parts']
+            as List<dynamic>;
+    final text = (parts.first as Map<String, dynamic>)['text'] as String;
+
+    return _parseResponse(text, resultId, null);
+  }
+
+  Future<PackagingIdentification> identifyPackaging({
+    required File imageFile,
+  }) async {
+    final base64Image = await ImageUtils.fileToBase64(imageFile);
+    final mimeType = ImageUtils.getMimeType(imageFile.path);
+
+    const prompt = '''
+You are an expert at identifying consumer products (medicines, cosmetics, skincare, baby products, health supplements, personal care) from their packaging design, logos, and visible text.
+
+Look at this product packaging photo and identify the product.
+
+Return ONLY a valid JSON object (no markdown, no code blocks, no extra text) with this exact structure:
+
+{
+  "product_name": "Product name as shown on packaging, or null if unreadable",
+  "brand": "Brand name, or null if unreadable",
+  "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, general",
+  "confidence": "one of: high, medium, low"
+}
+
+Use "low" confidence if the packaging text is unclear, partially obscured, or you are only guessing from general appearance.
+''';
+
+    final requestBody = {
+      'contents': [
+        {
+          'parts': [
+            {
+              'inline_data': {'mime_type': mimeType, 'data': base64Image},
+            },
+            {'text': prompt},
+          ],
+        },
+      ],
+      'generationConfig': {
+        'responseMimeType': 'application/json',
+      },
+    };
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl?key=$apiKey'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      final errorMsg =
+          (errorBody['error'] as Map<String, dynamic>?)?['message']
+                  as String? ??
+              'API Error ${response.statusCode}';
+      throw GeminiException(errorMsg, response.statusCode);
+    }
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+    final candidates = responseData['candidates'] as List<dynamic>;
+    final parts =
+        (candidates.first as Map<String, dynamic>)['content']['parts']
+            as List<dynamic>;
+    final text = (parts.first as Map<String, dynamic>)['text'] as String;
+
+    final json = jsonDecode(text.trim()) as Map<String, dynamic>;
+    return PackagingIdentification(
+      productName: json['product_name'] as String?,
+      brand: json['brand'] as String?,
+      category: _parseCategory(json['category'] as String?),
+      confidence: json['confidence'] as String? ?? 'low',
+    );
+  }
+
+  Future<String?> searchCompositionByWeb({
+    required String productName,
+    String? brand,
+  }) async {
+    final productLabel =
+        brand != null && brand.isNotEmpty ? '$brand $productName' : productName;
+
+    final prompt =
+        'Cari daftar komposisi/ingredients lengkap dari produk berikut: $productLabel. '
+        'Jika kamu menemukan sumber yang bisa dipercaya (situs resmi produsen, database produk, atau retailer terpercaya), '
+        'balas HANYA dengan daftar bahan mentah apa adanya (dipisah koma), tanpa penjelasan tambahan. '
+        'Jika tidak menemukan sumber terpercaya, balas PERSIS dengan teks ini saja: TIDAK_DITEMUKAN';
+
+    final requestBody = {
+      'contents': [
+        {
+          'parts': [
+            {'text': prompt},
+          ],
+        },
+      ],
+      'tools': [
+        {'google_search': {}},
+      ],
+    };
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl?key=$apiKey'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode != 200) return null;
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+    final candidates = responseData['candidates'] as List<dynamic>?;
+    if (candidates == null || candidates.isEmpty) return null;
+
+    final parts = (candidates.first as Map<String, dynamic>)['content']
+        ?['parts'] as List<dynamic>?;
+    if (parts == null || parts.isEmpty) return null;
+
+    final text = (parts.first as Map<String, dynamic>)['text'] as String? ?? '';
+    if (text.trim().isEmpty || isCompositionNotFound(text)) return null;
+
+    return text.trim();
+  }
+
   String _buildAnalysisPrompt() {
     return '''
 You are an expert ingredient analyst specializing in medicines, cosmetics, skincare, baby products, health supplements, and personal care products.
@@ -121,7 +304,7 @@ Analyze ALL visible ingredients. Be thorough and accurate. Return Indonesian lan
   }
 
   AnalysisResult _parseResponse(
-      String text, String resultId, String imagePath) {
+      String text, String resultId, String? imagePath) {
     String jsonText = text.trim();
 
     // Extract JSON if wrapped in markdown code blocks
