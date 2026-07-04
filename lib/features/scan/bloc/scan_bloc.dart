@@ -76,7 +76,7 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
     emit(ScanAnalyzing(currentState.image));
 
     try {
-      final geminiService = GeminiService(apiKey: storageService.getApiKey());
+      final geminiService = GeminiService(apiKeys: storageService.getApiKeys());
       final resultId = _uuid.v4();
 
       final result = await geminiService.analyzeIngredients(

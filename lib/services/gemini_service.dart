@@ -35,9 +35,27 @@ class GeminiService {
   static const String _baseUrl =
       'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent';
 
-  final String apiKey;
+  final List<String> apiKeys;
 
-  GeminiService({required this.apiKey});
+  GeminiService({required this.apiKeys})
+      : assert(apiKeys.isNotEmpty, 'apiKeys must not be empty');
+
+  // Coba key berikutnya kalau kena rate limit (429) — key lain biasanya
+  // dari akun Google terpisah sehingga limitnya independen. Error selain
+  // 429 langsung dikembalikan tanpa retry karena bukan soal kuota.
+  Future<http.Response> _post(Map<String, dynamic> requestBody) async {
+    http.Response? lastResponse;
+    for (final key in apiKeys) {
+      final response = await http.post(
+        Uri.parse('$_baseUrl?key=$key'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode != 429) return response;
+      lastResponse = response;
+    }
+    return lastResponse!;
+  }
 
   Future<AnalysisResult> analyzeIngredients({
     required File imageFile,
@@ -67,11 +85,7 @@ class GeminiService {
       },
     };
 
-    final response = await http.post(
-      Uri.parse('$_baseUrl?key=$apiKey'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(requestBody),
-    );
+    final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -116,11 +130,7 @@ class GeminiService {
       },
     };
 
-    final response = await http.post(
-      Uri.parse('$_baseUrl?key=$apiKey'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(requestBody),
-    );
+    final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -213,11 +223,7 @@ Use "low" confidence in case (B) if the packaging text is unclear, partially obs
       },
     };
 
-    final response = await http.post(
-      Uri.parse('$_baseUrl?key=$apiKey'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(requestBody),
-    );
+    final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -275,11 +281,7 @@ Use "low" confidence in case (B) if the packaging text is unclear, partially obs
       ],
     };
 
-    final response = await http.post(
-      Uri.parse('$_baseUrl?key=$apiKey'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(requestBody),
-    );
+    final response = await _post(requestBody);
 
     if (response.statusCode != 200) return null;
 

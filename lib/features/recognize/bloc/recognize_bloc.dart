@@ -22,7 +22,7 @@ class RecognizeBloc extends Bloc<RecognizeEvent, RecognizeState> {
   Future<void> _onPhotoTaken(
       PhotoTaken event, Emitter<RecognizeState> emit) async {
     emit(const RecognizeAnalyzingPhoto());
-    final geminiService = GeminiService(apiKey: storageService.getApiKey());
+    final geminiService = GeminiService(apiKeys: storageService.getApiKeys());
 
     PhotoAnalysisResult photoResult;
     try {
@@ -89,7 +89,7 @@ class RecognizeBloc extends Bloc<RecognizeEvent, RecognizeState> {
   }) async {
     emit(const RecognizeAnalyzing());
     try {
-      final geminiService = GeminiService(apiKey: storageService.getApiKey());
+      final geminiService = GeminiService(apiKeys: storageService.getApiKeys());
       final resultId = _uuid.v4();
       final result = await geminiService.analyzeIngredientsFromText(
         ingredientsText: ingredientsText,
