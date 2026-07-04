@@ -43,6 +43,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildAllergyProfileCard(context)
+                .animate()
+                .fadeIn(duration: 400.ms),
+            const SizedBox(height: 24),
             _buildAboutSection().animate().fadeIn(duration: 400.ms),
             const SizedBox(height: 24),
             _buildDangerZone()
@@ -51,6 +55,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 40),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAllergyProfileCard(BuildContext context) {
+    return _SectionCard(
+      title: 'Profil Alergi',
+      icon: Icons.health_and_safety_rounded,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Atur bahan yang bikin kamu sensitif supaya hasil analisis menyorotnya otomatis.',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/allergy-profile'),
+            icon: const Icon(Icons.tune_rounded),
+            label: const Text('Atur Profil Alergi'),
+          ),
+        ],
       ),
     );
   }

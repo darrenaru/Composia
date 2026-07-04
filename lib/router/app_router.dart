@@ -7,6 +7,7 @@ import '../features/onboarding/onboarding_screen.dart';
 import '../features/result/result_screen.dart';
 import '../features/scan/bloc/scan_bloc.dart';
 import '../features/scan/scan_screen.dart';
+import '../features/settings/allergy_profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
 import '../services/storage_service.dart';
@@ -57,6 +58,11 @@ class AppRouter {
         path: '/settings',
         builder: (context, state) =>
             SettingsScreen(storageService: storageService),
+      ),
+      GoRoute(
+        path: '/allergy-profile',
+        builder: (context, state) =>
+            AllergyProfileScreen(storageService: storageService),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
