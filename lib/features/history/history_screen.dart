@@ -19,6 +19,8 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   List<AnalysisResult> _history = [];
+  bool _selectionMode = false;
+  final Set<String> _selectedIds = {};
 
   @override
   void initState() {
@@ -28,6 +30,38 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _loadHistory() {
     setState(() => _history = widget.storageService.getHistory());
+  }
+
+  void _toggleSelectionMode() {
+    setState(() {
+      _selectionMode = !_selectionMode;
+      _selectedIds.clear();
+    });
+  }
+
+  void _toggleSelected(String id) {
+    setState(() {
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+      } else if (_selectedIds.length < 2) {
+        _selectedIds.add(id);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Maksimal 2 produk untuk dibandingkan')),
+        );
+      }
+    });
+  }
+
+  void _goToCompare() {
+    final ids = _selectedIds.toList();
+    context.push('/compare/${ids[0]}/${ids[1]}').then((_) {
+      setState(() {
+        _selectionMode = false;
+        _selectedIds.clear();
+      });
+    });
   }
 
   Future<void> _confirmClearAll() async {
@@ -74,7 +108,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
         actions: [
-          if (_history.isNotEmpty)
+          if (_history.length >= 2)
+            IconButton(
+              onPressed: _toggleSelectionMode,
+              icon: Icon(_selectionMode
+                  ? Icons.close_rounded
+                  : Icons.compare_arrows_rounded),
+              tooltip: _selectionMode ? 'Batal' : 'Bandingkan',
+            ),
+          if (!_selectionMode && _history.isNotEmpty)
             TextButton(
               onPressed: _confirmClearAll,
               child: const Text(
@@ -85,6 +127,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       ),
       body: _history.isEmpty ? _buildEmpty() : _buildList(),
+      bottomNavigationBar: _selectionMode && _selectedIds.length == 2
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: ElevatedButton(
+                  onPressed: _goToCompare,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: const Text(
+                    'Bandingkan (2)',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 
@@ -157,9 +220,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _HistoryCard(
                   result: result,
-                  onTap: () => context
-                      .push('/result/${result.id}')
-                      .then((_) => _loadHistory()),
+                  selectionMode: _selectionMode,
+                  selected: _selectedIds.contains(result.id),
+                  onTap: _selectionMode
+                      ? () => _toggleSelected(result.id)
+                      : () => context
+                          .push('/result/${result.id}')
+                          .then((_) => _loadHistory()),
                   onDelete: () async {
                     await widget.storageService
                         .removeFromHistory(result.id);
@@ -203,15 +270,78 @@ class _HistoryCard extends StatelessWidget {
   final AnalysisResult result;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+  final bool selectionMode;
+  final bool selected;
 
   const _HistoryCard({
     required this.result,
     this.onTap,
     this.onDelete,
+    this.selectionMode = false,
+    this.selected = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final card = GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            if (selectionMode) ...[
+              Icon(
+                selected
+                    ? Icons.check_circle_rounded
+                    : Icons.circle_outlined,
+                color: selected ? AppColors.primary : AppColors.textHint,
+              ),
+              const SizedBox(width: 12),
+            ],
+            _buildIcon(),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    result.productName ?? 'Produk Tanpa Nama',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${result.ingredients.length} bahan • ${DateFormat('HH:mm').format(result.analyzedAt)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            SafetyBadge(level: result.overallSafetyLevel, compact: true),
+          ],
+        ),
+      ),
+    );
+
+    if (selectionMode) return card;
+
     return Dismissible(
       key: Key(result.id),
       direction: DismissDirection.endToStart,
@@ -225,50 +355,7 @@ class _HistoryCard extends StatelessWidget {
         ),
         child: const Icon(Icons.delete_rounded, color: Colors.white),
       ),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              _buildIcon(),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      result.productName ?? 'Produk Tanpa Nama',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${result.ingredients.length} bahan • ${DateFormat('HH:mm').format(result.analyzedAt)}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              SafetyBadge(level: result.overallSafetyLevel, compact: true),
-            ],
-          ),
-        ),
-      ),
+      child: card,
     );
   }
 
