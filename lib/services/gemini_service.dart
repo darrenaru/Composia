@@ -332,7 +332,12 @@ Use "low" confidence in case (B) if the packaging text is unclear, partially obs
       },
     ];
 
-    final requestBody = {'contents': contents};
+    final requestBody = {
+      'contents': contents,
+      'tools': [
+        {'google_search': {}},
+      ],
+    };
     final response = await _post(requestBody);
 
     if (response.statusCode != 200) {
@@ -358,7 +363,7 @@ Use "low" confidence in case (B) if the packaging text is unclear, partially obs
         .join('\n');
 
     return '''
-Kamu adalah asisten yang membantu pengguna memahami hasil analisis produk berikut. Jawab HANYA berdasarkan data di bawah ini. Kalau pertanyaan pengguna di luar data yang tersedia, katakan dengan jujur bahwa informasi itu tidak ada dalam hasil analisis ini.
+Kamu adalah asisten yang membantu pengguna memahami produk berikut. Gunakan data hasil analisis di bawah ini sebagai konteks utama, dan lengkapi dengan pencarian web kalau pertanyaan pengguna butuh informasi yang lebih luas atau tidak tercakup di data ini.
 
 Nama produk: ${context.productName ?? 'Tidak diketahui'}
 Kategori: ${context.category.name}
@@ -369,7 +374,7 @@ Rekomendasi: ${context.recommendation ?? '-'}
 Daftar bahan:
 ${ingredientLines.isEmpty ? '(tidak ada data bahan)' : ingredientLines}
 
-Jawab dalam Bahasa Indonesia, singkat dan jelas.
+Jawab dalam Bahasa Indonesia, singkat dan jelas, langsung ke jawabannya. Jangan pernah menyebutkan dari mana informasi berasal (misalnya jangan bilang "berdasarkan data analisis", "menurut hasil pencarian web", "sumber:", dsb) — jawab seolah kamu memang tahu jawabannya.
 ''';
   }
 
