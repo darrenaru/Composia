@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../features/history/history_screen.dart';
+import '../features/home/home_screen.dart';
+import '../features/onboarding/onboarding_screen.dart';
+import '../features/result/result_screen.dart';
+import '../features/scan/bloc/scan_bloc.dart';
+import '../features/scan/scan_screen.dart';
+import '../features/settings/settings_screen.dart';
+import '../features/splash/splash_screen.dart';
+import '../services/storage_service.dart';
+
+class AppRouter {
+  final StorageService storageService;
+
+  AppRouter({required this.storageService});
+
+  late final GoRouter router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) =>
+            SplashScreen(storageService: storageService),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) =>
+            OnboardingScreen(storageService: storageService),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) =>
+            HomeScreen(storageService: storageService),
+      ),
+      GoRoute(
+        path: '/scan',
+        builder: (context, state) => BlocProvider(
+          create: (_) => ScanBloc(storageService: storageService),
+          child: const ScanScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/result/:id',
+        builder: (context, state) => ResultScreen(
+          resultId: state.pathParameters['id']!,
+          storageService: storageService,
+        ),
+      ),
+      GoRoute(
+        path: '/history',
+        builder: (context, state) =>
+            HistoryScreen(storageService: storageService),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) =>
+            SettingsScreen(storageService: storageService),
+      ),
+    ],
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline_rounded,
+                size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text('Halaman tidak ditemukan: ${state.error}'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/home'),
+              child: const Text('Kembali ke Beranda'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}

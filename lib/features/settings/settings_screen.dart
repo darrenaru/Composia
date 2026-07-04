@@ -1,0 +1,236 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_strings.dart';
+import '../../services/storage_service.dart';
+
+class SettingsScreen extends StatefulWidget {
+  final StorageService storageService;
+
+  const SettingsScreen({super.key, required this.storageService});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  void _showSnack(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor:
+            isError ? AppColors.dangerRed : AppColors.safeGreen,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(AppStrings.settingsTitle),
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAboutSection().animate().fadeIn(duration: 400.ms),
+            const SizedBox(height: 24),
+            _buildDangerZone()
+                .animate()
+                .fadeIn(delay: 250.ms, duration: 400.ms),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAboutSection() {
+    return _SectionCard(
+      title: 'Tentang Composia',
+      icon: Icons.info_rounded,
+      child: Column(
+        children: [
+          _buildInfoRow(
+            Icons.biotech_rounded,
+            'Versi Aplikasi',
+            '1.0.0',
+          ),
+          const Divider(height: 24, color: AppColors.divider),
+          _buildInfoRow(
+            Icons.psychology_rounded,
+            'Model AI',
+            'Gemini 2.5 Flash',
+          ),
+          const Divider(height: 24, color: AppColors.divider),
+          _buildInfoRow(
+            Icons.language_rounded,
+            'Bahasa',
+            'Bahasa Indonesia',
+          ),
+          const Divider(height: 24, color: AppColors.divider),
+          _buildInfoRow(
+            Icons.category_rounded,
+            'Kategori Produk',
+            'Obat, Kosmetik, Skincare,\nBayi, Suplemen, Perawatan Diri',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDangerZone() {
+    return _SectionCard(
+      title: 'Zona Berbahaya',
+      icon: Icons.warning_rounded,
+      iconColor: AppColors.dangerRed,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tindakan berikut tidak dapat dibatalkan.',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: _confirmClearHistory,
+            icon: const Icon(Icons.delete_sweep_rounded,
+                color: AppColors.dangerRed),
+            label: const Text(
+              'Hapus Semua Riwayat',
+              style: TextStyle(color: AppColors.dangerRed),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.dangerRed),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.primary),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          textAlign: TextAlign.right,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _confirmClearHistory() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Hapus Semua Riwayat?'),
+        content: const Text(
+            'Semua riwayat scan akan dihapus secara permanen.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Hapus',
+                style: TextStyle(color: AppColors.dangerRed)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await widget.storageService.clearHistory();
+      _showSnack('Semua riwayat berhasil dihapus');
+    }
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Color? iconColor;
+  final Widget child;
+
+  const _SectionCard({
+    required this.title,
+    required this.icon,
+    this.iconColor,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+            child: Row(
+              children: [
+                Icon(icon,
+                    size: 20, color: iconColor ?? AppColors.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: AppColors.divider),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+}
