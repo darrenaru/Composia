@@ -180,14 +180,6 @@ class AppTheme {
           fontSize: 14,
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surfaceLight,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textHint,
-        elevation: 8,
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: true,
-      ),
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
