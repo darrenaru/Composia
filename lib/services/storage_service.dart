@@ -50,7 +50,7 @@ class StorageService {
   Future<void> setLanguage(String lang) => _prefs.setString(_languageKey, lang);
 
   // History
-  List<AnalysisResult> getHistory() {
+  List<AnalysisResult> _readAllResults() {
     final jsonList = _prefs.getStringList(_historyKey) ?? [];
     return jsonList
         .map((s) {
@@ -65,8 +65,17 @@ class StorageService {
       ..sort((a, b) => b.analyzedAt.compareTo(a.analyzedAt));
   }
 
+  // Produk tanpa nama (mis. label bahan tidak terbaca) tidak ditampilkan
+  // di Riwayat, tapi tetap tersimpan supaya ResultScreen bisa menampilkannya
+  // sekali langsung setelah scan.
+  List<AnalysisResult> getHistory() {
+    return _readAllResults()
+        .where((r) => r.productName != null && r.productName!.trim().isNotEmpty)
+        .toList();
+  }
+
   Future<void> saveToHistory(AnalysisResult result) async {
-    final history = getHistory();
+    final history = _readAllResults();
     history.removeWhere((r) => r.id == result.id);
     history.insert(0, result);
 
@@ -76,7 +85,7 @@ class StorageService {
   }
 
   Future<void> removeFromHistory(String id) async {
-    final history = getHistory();
+    final history = _readAllResults();
     history.removeWhere((r) => r.id == id);
     final jsonList = history.map((r) => r.toJsonString()).toList();
     await _prefs.setStringList(_historyKey, jsonList);
@@ -86,7 +95,7 @@ class StorageService {
 
   AnalysisResult? getResultById(String id) {
     try {
-      return getHistory().firstWhere((r) => r.id == id);
+      return _readAllResults().firstWhere((r) => r.id == id);
     } catch (_) {
       return null;
     }
