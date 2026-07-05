@@ -59,8 +59,7 @@ class RecognizeBloc extends Bloc<RecognizeEvent, RecognizeState> {
     if (lookup != null) {
       compositionText = lookup.ingredientsText;
       productNameHint = lookup.productName ?? needsLookup.productName;
-    } else if (needsLookup.confidence != 'low' &&
-        needsLookup.productName != null &&
+    } else if (needsLookup.productName != null &&
         needsLookup.productName!.trim().isNotEmpty) {
       emit(RecognizeSearchingComposition(needsLookup.productName!));
       compositionText = await geminiService.searchCompositionByWeb(
