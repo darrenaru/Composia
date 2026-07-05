@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/tab_header.dart';
+import '../../core/widgets/update_dialog.dart';
 import '../../services/storage_service.dart';
 import '../../services/update_service.dart';
 
@@ -26,8 +26,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    PackageInfo.fromPlatform().then((info) {
-      if (mounted) setState(() => _appVersion = info.version);
+    PackageInfo.fromPlatform().then((info) async {
+      if (!mounted) return;
+      setState(() => _appVersion = info.version);
+      final update = await UpdateService().checkForUpdate(info.version);
+      if (update != null && mounted) showUpdateDialog(context, update);
     });
   }
 
@@ -42,29 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Update Tersedia'),
-        content: Text(
-          'Versi ${update.latestVersion} sudah tersedia. Unduh dan pasang untuk mendapatkan perbaikan terbaru.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Nanti'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              launchUrl(Uri.parse(update.downloadUrl),
-                  mode: LaunchMode.externalApplication);
-            },
-            child: const Text('Update Sekarang'),
-          ),
-        ],
-      ),
-    );
+    showUpdateDialog(context, update);
   }
 
   void _showSnack(String msg, {bool isError = false}) {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/constants/category_style.dart';
@@ -10,6 +9,7 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/scan_result_card.dart';
 import '../../core/widgets/tab_header.dart';
+import '../../core/widgets/update_dialog.dart';
 import '../../models/analysis_result.dart';
 import '../../services/storage_service.dart';
 import '../../services/update_service.dart';
@@ -39,30 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final info = await PackageInfo.fromPlatform();
     final update = await UpdateService().checkForUpdate(info.version);
     if (update == null || !mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Update Tersedia'),
-        content: Text(
-          'Versi ${update.latestVersion} sudah tersedia. Unduh dan pasang untuk mendapatkan perbaikan terbaru.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Nanti'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              launchUrl(Uri.parse(update.downloadUrl),
-                  mode: LaunchMode.externalApplication);
-            },
-            child: const Text('Update Sekarang'),
-          ),
-        ],
-      ),
-    );
+    showUpdateDialog(context, update);
   }
 
   @override
