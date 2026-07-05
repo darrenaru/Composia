@@ -194,6 +194,8 @@ If case (A) — a composition/ingredients list is visible and readable, use this
 
 IMPORTANT — extracting product_name: only use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. If you cannot confidently identify a real product name distinct from descriptive/marketing text, return null instead of guessing.
 
+IMPORTANT — completeness of the ingredients list: the composition list on a label can be long (20-40+ ingredients is common) and often wraps across multiple lines or continues after a line break. Read the ENTIRE list from the very first ingredient to the very last, do not stop early or summarize/truncate it. Every single ingredient printed in the list must appear as its own entry in the "ingredients" array — never merge multiple ingredients into one entry, never omit ingredients near the end of a long list, and never skip ingredients just because they are minor (fragrance components, trace preservatives, colorants) or hard to read — do your best to transcribe every name exactly as printed, even ones split by a line wrap.
+
 {
   "mode": "direct_analysis",
   "product_name": "Actual product/brand name as printed, or null if not confidently identifiable",
@@ -401,6 +403,8 @@ Analyze the product label in this image and identify all ingredients listed.
 
 IMPORTANT — extracting product_name: only use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. If you cannot confidently identify a real product name distinct from descriptive/marketing text, return null instead of guessing.
 
+IMPORTANT — completeness of the ingredients list: the composition list on a label can be long (20-40+ ingredients is common) and often wraps across multiple lines or continues after a line break. Read the ENTIRE list from the very first ingredient to the very last, do not stop early or summarize/truncate it. Every single ingredient printed in the list must appear as its own entry in the "ingredients" array — never merge multiple ingredients into one entry, never omit ingredients near the end of a long list, and never skip ingredients just because they are minor (fragrance components, trace preservatives, colorants) or hard to read — do your best to transcribe every name exactly as printed, even ones split by a line wrap.
+
 Return ONLY a valid JSON object (no markdown, no code blocks, no extra text) with this exact structure:
 
 {
@@ -444,7 +448,7 @@ If no ingredient list is visible in the image, return:
   "ingredients": []
 }
 
-Analyze ALL visible ingredients. Be thorough and accurate. Return Indonesian language for all text fields.
+Analyze ALL visible ingredients from start to finish of the list — completeness matters more than brevity. Be thorough and accurate. Return Indonesian language for all text fields.
 ''';
   }
 

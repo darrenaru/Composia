@@ -13,7 +13,7 @@ class StorageService {
   // bukan hardcode, supaya tidak ke-commit ke git. Siapapun yang punya APK
   // hasil build tetap bisa mengekstrak key dari binary — ganti ke server
   // proxy kalau APK ini bakal disebar lebih luas dari sekadar teman dekat.
-  // GEMINI_API_KEY_2/_3 opsional — key dari akun Google terpisah, dipakai
+  // GEMINI_API_KEY_2/_3/_4 opsional — key dari akun Google terpisah, dipakai
   // sebagai fallback kalau key sebelumnya kena rate limit (429).
   static const String _defaultApiKey =
       String.fromEnvironment('GEMINI_API_KEY');
@@ -21,6 +21,10 @@ class StorageService {
       String.fromEnvironment('GEMINI_API_KEY_2');
   static const String _fallbackApiKey3 =
       String.fromEnvironment('GEMINI_API_KEY_3');
+  static const String _fallbackApiKey4 =
+      String.fromEnvironment('GEMINI_API_KEY_4');
+  static const String _fallbackApiKey5 =
+      String.fromEnvironment('GEMINI_API_KEY_5');
   static const String _historyKey = 'composia_history';
   static const String _onboardingKey = 'composia_onboarding_done';
   static const String _languageKey = 'composia_language';
@@ -40,10 +44,13 @@ class StorageService {
   // menghabiskan jatah fitur lain: scan/recognize (fitur inti) dapat semua
   // key sebagai fallback; search & chat masing-masing dapat 1 key khusus,
   // dan otomatis fallback ke kumpulan penuh kalau key khususnya belum diisi.
-  List<String> _allConfiguredKeys() =>
-      [_defaultApiKey, _fallbackApiKey2, _fallbackApiKey3]
-          .where((k) => k.isNotEmpty)
-          .toList();
+  List<String> _allConfiguredKeys() => [
+        _defaultApiKey,
+        _fallbackApiKey2,
+        _fallbackApiKey3,
+        _fallbackApiKey4,
+        _fallbackApiKey5,
+      ].where((k) => k.isNotEmpty).toList();
 
   List<String> getScanApiKeys() => _allConfiguredKeys();
 
