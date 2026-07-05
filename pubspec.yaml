@@ -39,7 +39,7 @@ dependencies:
   intl: ^0.20.2
   permission_handler: ^11.3.0
   package_info_plus: ^8.0.0
-  url_launcher: ^6.3.0
+  open_filex: ^4.5.0
 
   cupertino_icons: ^1.0.6
 

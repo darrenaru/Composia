@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class UpdateInfo {
   final String latestVersion;
@@ -43,6 +45,35 @@ class UpdateService {
     } catch (_) {
       return null;
     }
+  }
+
+  // Unduh APK langsung ke cache dir aplikasi (bukan buka browser) supaya
+  // instalasi bisa dipicu langsung dari dalam app lewat open_filex.
+  Future<String> downloadApk(
+    String url, {
+    void Function(double progress)? onProgress,
+  }) async {
+    final tempDir = await getTemporaryDirectory();
+    final filePath = '${tempDir.path}/composia-update.apk';
+    final file = File(filePath);
+
+    final request = http.Request('GET', Uri.parse(url));
+    final response = await _client.send(request);
+    if (response.statusCode != 200) {
+      throw Exception('Gagal mengunduh update (${response.statusCode})');
+    }
+
+    final contentLength = response.contentLength ?? 0;
+    final sink = file.openWrite();
+    var received = 0;
+    await for (final chunk in response.stream) {
+      sink.add(chunk);
+      received += chunk.length;
+      if (contentLength > 0) onProgress?.call(received / contentLength);
+    }
+    await sink.close();
+
+    return filePath;
   }
 
   bool _isNewer(String latest, String current) {
