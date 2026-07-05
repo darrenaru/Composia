@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/tab_header.dart';
 import '../../services/storage_service.dart';
+import '../../services/update_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final StorageService storageService;
@@ -19,6 +21,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String _appVersion = '';
+  bool _isCheckingUpdate = false;
 
   @override
   void initState() {
@@ -26,6 +29,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
     PackageInfo.fromPlatform().then((info) {
       if (mounted) setState(() => _appVersion = info.version);
     });
+  }
+
+  Future<void> _checkForUpdate() async {
+    setState(() => _isCheckingUpdate = true);
+    final update = await UpdateService().checkForUpdate(_appVersion);
+    if (!mounted) return;
+    setState(() => _isCheckingUpdate = false);
+
+    if (update == null) {
+      _showSnack('Sudah versi terbaru.');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Update Tersedia'),
+        content: Text(
+          'Versi ${update.latestVersion} sudah tersedia. Unduh dan pasang untuk mendapatkan perbaikan terbaru.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Nanti'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              launchUrl(Uri.parse(update.downloadUrl),
+                  mode: LaunchMode.externalApplication);
+            },
+            child: const Text('Update Sekarang'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSnack(String msg, {bool isError = false}) {
@@ -115,6 +154,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Icons.language_rounded,
             'Bahasa',
             'Bahasa Indonesia',
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: _isCheckingUpdate ? null : _checkForUpdate,
+            icon: _isCheckingUpdate
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.system_update_rounded),
+            label: Text(_isCheckingUpdate ? 'Memeriksa...' : 'Cek Update'),
           ),
         ],
       ),
