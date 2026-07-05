@@ -33,8 +33,14 @@ class ProductLookupService {
     );
     if (fromBeautyFacts != null) return fromBeautyFacts;
 
-    return _tryFetch(
+    final fromFoodFacts = await _tryFetch(
       'https://world.openfoodfacts.org/api/v2/product/$barcode.json'
+      '?fields=product_name,brands,ingredients_text',
+    );
+    if (fromFoodFacts != null) return fromFoodFacts;
+
+    return _tryFetch(
+      'https://world.openproductsfacts.org/api/v2/product/$barcode.json'
       '?fields=product_name,brands,ingredients_text',
     );
   }
@@ -46,8 +52,14 @@ class ProductLookupService {
     );
     if (fromBeautyFacts.isNotEmpty) return fromBeautyFacts;
 
-    return _trySearch(
+    final fromFoodFacts = await _trySearch(
       'https://world.openfoodfacts.org/cgi/search.pl'
+      '?search_terms=${Uri.encodeComponent(query)}&search_simple=1&action=process&json=1&page_size=10',
+    );
+    if (fromFoodFacts.isNotEmpty) return fromFoodFacts;
+
+    return _trySearch(
+      'https://world.openproductsfacts.org/cgi/search.pl'
       '?search_terms=${Uri.encodeComponent(query)}&search_simple=1&action=process&json=1&page_size=10',
     );
   }

@@ -41,6 +41,8 @@ class AppColors {
   static const Color categoryBabyProduct = Color(0xFFA78BBE); // soft lavender
   static const Color categorySupplement = Color(0xFF5B8A9A); // dusty teal-blue
   static const Color categoryPersonalCare = Color(0xFFA98B5D); // warm ochre
+  static const Color categoryFoodBeverage = Color(0xFFD1A34F); // warm mustard
+  static const Color categoryHousehold = Color(0xFF6E8FA3); // muted steel-blue
 
   // Gradient
   static const LinearGradient primaryGradient = LinearGradient(

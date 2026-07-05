@@ -19,6 +19,10 @@ extension ProductCategoryStyle on ProductCategory {
         return Icons.health_and_safety_rounded;
       case ProductCategory.personalCare:
         return Icons.self_improvement_rounded;
+      case ProductCategory.foodBeverage:
+        return Icons.restaurant_rounded;
+      case ProductCategory.household:
+        return Icons.cleaning_services_rounded;
       case ProductCategory.general:
         return Icons.inventory_2_rounded;
     }
@@ -38,6 +42,10 @@ extension ProductCategoryStyle on ProductCategory {
         return AppColors.categorySupplement;
       case ProductCategory.personalCare:
         return AppColors.categoryPersonalCare;
+      case ProductCategory.foodBeverage:
+        return AppColors.categoryFoodBeverage;
+      case ProductCategory.household:
+        return AppColors.categoryHousehold;
       case ProductCategory.general:
         return AppColors.primary;
     }
@@ -57,6 +65,10 @@ extension ProductCategoryStyle on ProductCategory {
         return AppStrings.categorySupplement;
       case ProductCategory.personalCare:
         return AppStrings.categoryPersonalCare;
+      case ProductCategory.foodBeverage:
+        return AppStrings.categoryFoodBeverage;
+      case ProductCategory.household:
+        return AppStrings.categoryHousehold;
       case ProductCategory.general:
         return AppStrings.categoryGeneral;
     }

@@ -9,6 +9,8 @@ enum ProductCategory {
   babyProduct,
   supplement,
   personalCare,
+  foodBeverage,
+  household,
   general,
 }
 
@@ -125,6 +127,11 @@ class AnalysisResult {
       case 'personalcare':
       case 'personal_care':
         return ProductCategory.personalCare;
+      case 'foodbeverage':
+      case 'food_beverage':
+        return ProductCategory.foodBeverage;
+      case 'household':
+        return ProductCategory.household;
       default:
         return ProductCategory.general;
     }

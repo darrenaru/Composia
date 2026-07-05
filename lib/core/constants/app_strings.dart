@@ -7,7 +7,7 @@ class AppStrings {
   // Onboarding
   static const String onboarding1Title = 'Scan Label Produk';
   static const String onboarding1Desc =
-      'Foto label produk apapun — obat, kosmetik, skincare, hingga suplemen.';
+      'Foto label produk apapun — obat, kosmetik, skincare, makanan, minuman, hingga produk rumah tangga.';
   static const String onboarding2Title = 'AI Analisis Bahan';
   static const String onboarding2Desc =
       'Kecerdasan buatan kami menganalisis setiap bahan dan menjelaskan fungsinya.';
@@ -97,5 +97,7 @@ class AppStrings {
   static const String categoryBabyProduct = 'Produk Bayi';
   static const String categorySupplement = 'Suplemen';
   static const String categoryPersonalCare = 'Perawatan Diri';
+  static const String categoryFoodBeverage = 'Makanan & Minuman';
+  static const String categoryHousehold = 'Produk Rumah Tangga';
   static const String categoryGeneral = 'Produk Umum';
 }

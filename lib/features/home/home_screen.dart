@@ -103,6 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ProductCategory.babyProduct,
       ProductCategory.supplement,
       ProductCategory.personalCare,
+      ProductCategory.foodBeverage,
+      ProductCategory.household,
     ];
 
     return Column(

@@ -183,7 +183,7 @@ class GeminiService {
     final mimeType = ImageUtils.getMimeType(imageFile.path);
 
     const prompt = '''
-You are an expert at analyzing consumer product photos (medicines, cosmetics, skincare, baby products, health supplements, personal care).
+You are an expert at analyzing consumer product photos (medicines, cosmetics, skincare, baby products, health supplements, personal care, food & beverages, and household products).
 
 Look at this photo carefully. It may show either:
 (A) A visible ingredients/composition list (label text), or
@@ -195,14 +195,14 @@ Return ONLY a valid JSON object (no markdown, no code blocks, no extra text).
 
 If case (A) — a composition/ingredients list is visible and readable, use this structure:
 
-IMPORTANT — extracting product_name: only use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. If you cannot confidently identify a real product name distinct from descriptive/marketing text, return null instead of guessing.
+IMPORTANT — extracting product_name: use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. Note: for many Indonesian traditional/household products (e.g. "Minyak Kayu Putih", "Minyak Telon", "Minyak Tawon"), the generic category name IS the printed product name — use it rather than returning null. Only return null if there is truly no product name text printed anywhere on the packaging.
 
 IMPORTANT — completeness of the ingredients list: the composition list on a label can be long (20-40+ ingredients is common) and often wraps across multiple lines or continues after a line break. Read the ENTIRE list from the very first ingredient to the very last, do not stop early or summarize/truncate it. Every single ingredient printed in the list must appear as its own entry in the "ingredients" array — never merge multiple ingredients into one entry, never omit ingredients near the end of a long list, and never skip ingredients just because they are minor (fragrance components, trace preservatives, colorants) or hard to read — do your best to transcribe every name exactly as printed, even ones split by a line wrap.
 
 {
   "mode": "direct_analysis",
   "product_name": "Actual product/brand name as printed, or null if not confidently identifiable",
-  "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, general",
+  "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, food_beverage, household, general",
   "summary": "Brief 2-3 sentence summary in Indonesian about this product and its main purpose",
   "overall_safety_level": "one of: safe, caution, warning, danger, unknown",
   "overall_safety_note": "Explanation of overall safety in Indonesian (2-3 sentences)",
@@ -228,7 +228,7 @@ If case (B) — no readable composition list, only packaging/branding visible, u
   "mode": "needs_lookup",
   "product_name": "Product name as shown on packaging, or null if unreadable",
   "brand": "Brand name, or null if unreadable",
-  "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, general",
+  "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, food_beverage, household, general",
   "barcode_digits": "printed barcode number if visible as text, or null",
   "confidence": "one of: high, medium, low"
 }
@@ -400,11 +400,11 @@ Kalau pertanyaan pengguna sama sekali tidak berhubungan dengan produk ini (misal
 
   String _buildAnalysisPrompt() {
     return '''
-You are an expert ingredient analyst specializing in medicines, cosmetics, skincare, baby products, health supplements, and personal care products.
+You are an expert ingredient analyst specializing in medicines, cosmetics, skincare, baby products, health supplements, personal care products, food & beverages, and household products.
 
 Analyze the product label in this image and identify all ingredients listed.
 
-IMPORTANT — extracting product_name: only use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. If you cannot confidently identify a real product name distinct from descriptive/marketing text, return null instead of guessing.
+IMPORTANT — extracting product_name: use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. Note: for many Indonesian traditional/household products (e.g. "Minyak Kayu Putih", "Minyak Telon", "Minyak Tawon"), the generic category name IS the printed product name — use it rather than returning null. Only return null if there is truly no product name text printed anywhere on the packaging.
 
 IMPORTANT — completeness of the ingredients list: the composition list on a label can be long (20-40+ ingredients is common) and often wraps across multiple lines or continues after a line break. Read the ENTIRE list from the very first ingredient to the very last, do not stop early or summarize/truncate it. Every single ingredient printed in the list must appear as its own entry in the "ingredients" array — never merge multiple ingredients into one entry, never omit ingredients near the end of a long list, and never skip ingredients just because they are minor (fragrance components, trace preservatives, colorants) or hard to read — do your best to transcribe every name exactly as printed, even ones split by a line wrap.
 
@@ -412,7 +412,7 @@ Return ONLY a valid JSON object (no markdown, no code blocks, no extra text) wit
 
 {
   "product_name": "Actual product/brand name as printed, or null if not confidently identifiable",
-  "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, general",
+  "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, food_beverage, household, general",
   "summary": "Brief 2-3 sentence summary in Indonesian about this product and its main purpose",
   "overall_safety_level": "one of: safe, caution, warning, danger, unknown",
   "overall_safety_note": "Explanation of overall safety in Indonesian (2-3 sentences)",
@@ -504,6 +504,10 @@ Analyze ALL visible ingredients from start to finish of the list — completenes
         return ProductCategory.supplement;
       case 'personal_care':
         return ProductCategory.personalCare;
+      case 'food_beverage':
+        return ProductCategory.foodBeverage;
+      case 'household':
+        return ProductCategory.household;
       default:
         return ProductCategory.general;
     }
