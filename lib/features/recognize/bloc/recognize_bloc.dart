@@ -110,6 +110,9 @@ class RecognizeBloc extends Bloc<RecognizeEvent, RecognizeState> {
     if (e.isRateLimitError) {
       return e.rateLimitMessage;
     }
+    if (e.isServerError) {
+      return e.serverErrorMessage;
+    }
     return 'Gagal menganalisis: ${e.message}';
   }
 }

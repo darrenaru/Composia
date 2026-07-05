@@ -47,9 +47,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       compositionText =
           await geminiService.searchCompositionByWeb(productName: query);
     } on GeminiException catch (e) {
-      emit(SearchError(e.isRateLimitError
-          ? e.rateLimitMessage
-          : 'Gagal mencari: ${e.message}'));
+      emit(SearchError(_friendlyGeminiError(e, action: 'mencari')));
       return;
     }
 
@@ -91,9 +89,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       await storageService.saveToHistory(result);
       emit(SearchAnalysisSuccess(result));
     } on GeminiException catch (e) {
-      emit(SearchError(e.isRateLimitError
-          ? e.rateLimitMessage
-          : 'Gagal menganalisis: ${e.message}'));
+      emit(SearchError(_friendlyGeminiError(e, action: 'menganalisis')));
     }
+  }
+
+  String _friendlyGeminiError(GeminiException e, {required String action}) {
+    if (e.isRateLimitError) return e.rateLimitMessage;
+    if (e.isServerError) return e.serverErrorMessage;
+    return 'Gagal $action: ${e.message}';
   }
 }

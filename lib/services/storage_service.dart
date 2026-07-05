@@ -40,28 +40,23 @@ class StorageService {
   }
 
   // API Key — ditanam langsung, tidak ada UI untuk isi/ubah manual.
-  // Dialokasikan per fitur supaya pemakaian berat di 1 fitur tidak ikut
-  // menghabiskan jatah fitur lain: scan/recognize (fitur inti) dapat semua
-  // key sebagai fallback; search & chat masing-masing dapat 1 key khusus,
-  // dan otomatis fallback ke kumpulan penuh kalau key khususnya belum diisi.
-  List<String> _allConfiguredKeys() => [
-        _defaultApiKey,
-        _fallbackApiKey2,
-        _fallbackApiKey3,
-        _fallbackApiKey4,
-        _fallbackApiKey5,
-      ].where((k) => k.isNotEmpty).toList();
-
-  List<String> getScanApiKeys() => _allConfiguredKeys();
+  // Dialokasikan per fitur, tidak dicampur: scan/recognize (pengenalan +
+  // ringkasan + analisis bahan) dapat 3 key khusus (1, 4, 5), search dapat
+  // 1 key khusus (2), chat dapat 1 key khusus (3). Kalau key khusus
+  // search/chat belum diisi, baru fallback ke kumpulan key scan.
+  List<String> getScanApiKeys() =>
+      [_defaultApiKey, _fallbackApiKey4, _fallbackApiKey5]
+          .where((k) => k.isNotEmpty)
+          .toList();
 
   List<String> getSearchApiKeys() {
     if (_fallbackApiKey2.isNotEmpty) return [_fallbackApiKey2];
-    return _allConfiguredKeys();
+    return getScanApiKeys();
   }
 
   List<String> getChatApiKeys() {
     if (_fallbackApiKey3.isNotEmpty) return [_fallbackApiKey3];
-    return _allConfiguredKeys();
+    return getScanApiKeys();
   }
 
   static const String _allergyProfileKey = 'composia_allergy_profile';

@@ -94,6 +94,8 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
         ));
       } else if (e.isRateLimitError) {
         emit(ScanError(e.rateLimitMessage));
+      } else if (e.isServerError) {
+        emit(ScanError(e.serverErrorMessage));
       } else {
         emit(ScanError('Gagal menganalisis: ${e.message}'));
       }

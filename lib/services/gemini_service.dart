@@ -41,9 +41,10 @@ class GeminiService {
   GeminiService({required this.apiKeys})
       : assert(apiKeys.isNotEmpty, 'apiKeys must not be empty');
 
-  // Coba key berikutnya kalau kena rate limit (429) — key lain biasanya
-  // dari akun Google terpisah sehingga limitnya independen. Error selain
-  // 429 langsung dikembalikan tanpa retry karena bukan soal kuota.
+  // Coba key berikutnya kalau kena rate limit (429) atau model sedang
+  // overload (503, "high demand") — key lain biasanya dari akun Google
+  // terpisah/project terpisah sehingga tidak ikut terdampak. Error selain
+  // itu langsung dikembalikan tanpa retry karena bukan soal kuota/beban.
   Future<http.Response> _post(Map<String, dynamic> requestBody) async {
     http.Response? lastResponse;
     for (final key in apiKeys) {
@@ -52,7 +53,9 @@ class GeminiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-      if (response.statusCode != 429) return response;
+      if (response.statusCode != 429 && response.statusCode != 503) {
+        return response;
+      }
       lastResponse = response;
     }
     return lastResponse!;
@@ -540,6 +543,9 @@ class GeminiException implements Exception {
   String get rateLimitMessage => retryDelaySeconds != null
       ? 'Terlalu banyak permintaan. Coba lagi dalam $retryDelaySeconds detik.'
       : 'Terlalu banyak permintaan. Tunggu sebentar dan coba lagi.';
+
+  String get serverErrorMessage =>
+      'Server AI sedang sibuk (permintaan tinggi). Coba lagi dalam beberapa saat.';
 
   @override
   String toString() => 'GeminiException($statusCode): $message';

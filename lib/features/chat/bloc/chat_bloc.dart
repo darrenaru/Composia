@@ -92,6 +92,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (e.isRateLimitError) {
       return e.rateLimitMessage;
     }
+    if (e.isServerError) {
+      return e.serverErrorMessage;
+    }
     return 'Gagal mengirim pesan: ${e.message}';
   }
 }
