@@ -38,6 +38,7 @@ dependencies:
   uuid: ^4.3.3
   intl: ^0.20.2
   permission_handler: ^11.3.0
+  package_info_plus: ^8.0.0
 
   cupertino_icons: ^1.0.6
 
