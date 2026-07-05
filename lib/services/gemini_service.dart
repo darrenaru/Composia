@@ -191,9 +191,12 @@ Decide which case applies, using all visible clues: OCR text, brand/logo recogni
 Return ONLY a valid JSON object (no markdown, no code blocks, no extra text).
 
 If case (A) — a composition/ingredients list is visible and readable, use this structure:
+
+IMPORTANT — extracting product_name: only use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. If you cannot confidently identify a real product name distinct from descriptive/marketing text, return null instead of guessing.
+
 {
   "mode": "direct_analysis",
-  "product_name": "Product name if visible, or null",
+  "product_name": "Actual product/brand name as printed, or null if not confidently identifiable",
   "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, general",
   "summary": "Brief 2-3 sentence summary in Indonesian about this product and its main purpose",
   "overall_safety_level": "one of: safe, caution, warning, danger, unknown",
@@ -396,10 +399,12 @@ You are an expert ingredient analyst specializing in medicines, cosmetics, skinc
 
 Analyze the product label in this image and identify all ingredients listed.
 
+IMPORTANT — extracting product_name: only use the actual brand/product name as printed on the packaging (usually short, set in the largest/boldest distinctive font, near a logo). Do NOT use marketing taglines, benefit descriptions, or ingredient callouts as the product name — text like "Centella Asiatica Acne Clear Hydrating & Calming Toner" is a descriptive tagline, not necessarily the registered product name, unless that IS genuinely the printed brand name. Never extract the product name from the ingredients/composition list itself. If you cannot confidently identify a real product name distinct from descriptive/marketing text, return null instead of guessing.
+
 Return ONLY a valid JSON object (no markdown, no code blocks, no extra text) with this exact structure:
 
 {
-  "product_name": "Product name if visible, or null",
+  "product_name": "Actual product/brand name as printed, or null if not confidently identifiable",
   "category": "one of: medicine, cosmetics, skincare, baby_product, supplement, personal_care, general",
   "summary": "Brief 2-3 sentence summary in Indonesian about this product and its main purpose",
   "overall_safety_level": "one of: safe, caution, warning, danger, unknown",
