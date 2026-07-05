@@ -37,13 +37,17 @@ class MainShell extends StatelessWidget {
             ],
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _navItemFor(0),
-              _navItemFor(1),
-              _ScanCenterButton(onTap: () => context.push('/recognize')),
-              _navItemFor(2),
-              _navItemFor(3),
+              Expanded(child: Center(child: _navItemFor(0))),
+              Expanded(child: Center(child: _navItemFor(1))),
+              Expanded(
+                child: Center(
+                  child: _ScanCenterButton(
+                      onTap: () => context.push('/recognize')),
+                ),
+              ),
+              Expanded(child: Center(child: _navItemFor(2))),
+              Expanded(child: Center(child: _navItemFor(3))),
             ],
           ),
         ),
@@ -85,7 +89,7 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.pill),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -126,9 +130,9 @@ class _ScanCenterButton extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.4),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
+                color: AppColors.primary.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
