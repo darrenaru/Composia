@@ -101,21 +101,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(height: 24, color: AppColors.divider),
           _buildInfoRow(
-            Icons.psychology_rounded,
-            'Model AI',
-            'Gemini 2.5 Flash',
-          ),
-          const Divider(height: 24, color: AppColors.divider),
-          _buildInfoRow(
             Icons.language_rounded,
             'Bahasa',
             'Bahasa Indonesia',
-          ),
-          const Divider(height: 24, color: AppColors.divider),
-          _buildInfoRow(
-            Icons.category_rounded,
-            'Kategori Produk',
-            'Obat, Kosmetik, Skincare,\nBayi, Suplemen, Perawatan Diri',
           ),
         ],
       ),
